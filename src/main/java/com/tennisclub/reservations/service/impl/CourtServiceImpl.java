@@ -6,6 +6,7 @@ import com.tennisclub.reservations.dto.create.CourtCreateDto;
 import com.tennisclub.reservations.exception.ResourceAlreadyExistsException;
 import com.tennisclub.reservations.mapper.CourtMapper;
 import com.tennisclub.reservations.mapper.ReservationMapper;
+import com.tennisclub.reservations.model.BaseEntity;
 import com.tennisclub.reservations.model.Court;
 import com.tennisclub.reservations.repository.CourtRepository;
 import com.tennisclub.reservations.service.CourtService;
@@ -14,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.Collections;
 import java.util.List;
 
@@ -58,6 +60,9 @@ public class CourtServiceImpl extends GenericCrudService<Court, CourtDto, CourtC
 
         return court.map(value ->
                         value.getReservations().stream()
+                            .sorted(Comparator.comparing(
+                                    BaseEntity::getCreationDate,
+                                    Comparator.nullsLast(Comparator.naturalOrder())))
                             .map(reservationMapper::toDto)
                             .toList())
                     .orElse(Collections.emptyList());

@@ -10,12 +10,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -60,7 +61,7 @@ public class CourtServiceTest {
         when(courtRepository.findByCourtNumber(4))
                 .thenReturn(Optional.empty());
 
-        var actual = courtRepository.findByCourtNumber(4);
+        var actual = courtService.findReservations(4);
 
         assertThat(actual).isEmpty();
     }
@@ -73,6 +74,29 @@ public class CourtServiceTest {
         );
 
         var court = CourtFactory.createCourt(4, reservations);
+
+        var reservationDTOs = List.of(
+                ReservationFactory.createDto(getTime(12, 0), getTime(13, 30)),
+                ReservationFactory.createDto(getTime(14, 0), getTime(15, 50))
+        );
+
+        when(courtRepository.findByCourtNumber(4))
+                .thenReturn(Optional.of(court));
+
+        var actual = courtService.findReservations(4);
+
+        assertThat(actual).isEqualTo(reservationDTOs);
+    }
+
+    @Test
+    public void findReservations_returnsReservationsOrderedByCreationDate() {
+        var laterCreatedReservation = ReservationFactory.createReservation(getTime(14, 0), getTime(15, 50));
+        laterCreatedReservation.setCreationDate(LocalDate.of(2024, 1, 2).atStartOfDay());
+
+        var earlierCreatedReservation = ReservationFactory.createReservation(getTime(12, 0), getTime(13, 30));
+        earlierCreatedReservation.setCreationDate(LocalDate.of(2024, 1, 1).atStartOfDay());
+
+        var court = CourtFactory.createCourt(4, List.of(laterCreatedReservation, earlierCreatedReservation));
 
         var reservationDTOs = List.of(
                 ReservationFactory.createDto(getTime(12, 0), getTime(13, 30)),
