@@ -37,7 +37,7 @@ public class UserControllerTest {
         when(userService.findReservations("123456789", false))
                 .thenReturn(reservationDTOs);
 
-        mockMvc.perform(get("/api/user/123456789/reservations"))
+        mockMvc.perform(get("/api/users/123456789/reservations"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()").value(2));
     }

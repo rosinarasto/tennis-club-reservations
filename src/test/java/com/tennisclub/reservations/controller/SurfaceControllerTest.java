@@ -42,7 +42,7 @@ public class SurfaceControllerTest {
         when(surfaceService.create(createDto))
                 .thenReturn(surfaceDto);
 
-        mockMvc.perform(post("/api/surface")
+        mockMvc.perform(post("/api/surfaces")
                         .content(convertToJson(createDto))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -58,7 +58,7 @@ public class SurfaceControllerTest {
         when(surfaceService.update(surfaceDto))
                 .thenReturn(updatedSurface);
 
-        mockMvc.perform(put("/api/surface")
+        mockMvc.perform(put("/api/surfaces")
                         .content(convertToJson(surfaceDto))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -73,7 +73,7 @@ public class SurfaceControllerTest {
         when(surfaceService.update(surfaceDto))
                 .thenThrow(new NotFoundException("Surface with id 999 not found"));
 
-        mockMvc.perform(put("/api/surface")
+        mockMvc.perform(put("/api/surfaces")
                         .content(convertToJson(surfaceDto))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
@@ -86,7 +86,7 @@ public class SurfaceControllerTest {
         when(surfaceService.softDeleteById(1L))
                 .thenReturn(Optional.of(deleteDto));
 
-        mockMvc.perform(delete("/api/surface/1"))
+        mockMvc.perform(delete("/api/surfaces/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1L))
                 .andExpect(jsonPath("$.name").value("wet"));
@@ -94,7 +94,7 @@ public class SurfaceControllerTest {
 
     @Test
     public void deleteAllSurfaces_returnsOkResponse() throws Exception {
-        mockMvc.perform(delete("/api/surface"))
+        mockMvc.perform(delete("/api/surfaces"))
                 .andExpect(status().isOk());
     }
 
@@ -105,7 +105,7 @@ public class SurfaceControllerTest {
         when(surfaceService.findById(1L))
                 .thenReturn(Optional.of(surface));
 
-        mockMvc.perform(get("/api/surface/1"))
+        mockMvc.perform(get("/api/surfaces/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("wet"));
     }
@@ -115,7 +115,7 @@ public class SurfaceControllerTest {
         when(surfaceService.findById(1L))
                 .thenReturn(Optional.empty());
 
-        mockMvc.perform(get("/api/surface/1"))
+        mockMvc.perform(get("/api/surfaces/1"))
                 .andExpect(status().isBadRequest());
     }
 
@@ -129,7 +129,7 @@ public class SurfaceControllerTest {
         when(surfaceService.findAll(any(Pageable.class)))
                 .thenReturn(new PageImpl<>(surfaces));
 
-        mockMvc.perform(get("/api/surface"))
+        mockMvc.perform(get("/api/surfaces"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(2)))
                 .andExpect(jsonPath("$.content[0].name").value("wet"))
