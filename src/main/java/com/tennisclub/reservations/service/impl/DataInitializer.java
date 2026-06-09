@@ -1,15 +1,19 @@
 package com.tennisclub.reservations.service.impl;
 
+import com.tennisclub.reservations.model.Role;
 import com.tennisclub.reservations.model.entity.Court;
 import com.tennisclub.reservations.model.entity.Surface;
+import com.tennisclub.reservations.model.entity.User;
 import com.tennisclub.reservations.repository.CourtRepository;
 import com.tennisclub.reservations.repository.SurfaceRepository;
+import com.tennisclub.reservations.repository.UserRepository;
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -25,6 +29,8 @@ public class DataInitializer {
 
     private final CourtRepository courtRepository;
     private final SurfaceRepository surfaceRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     private static final PageRequest INIT_PAGE = PageRequest.of(0, Integer.MAX_VALUE);
 
@@ -43,13 +49,26 @@ public class DataInitializer {
     @Value("${data.init.enabled:false}")
     private boolean dataInitEnabled;
 
+    @Value("${data.init.admin.name}")
+    private String adminName;
+
+    @Value("${data.init.admin.phone-number}")
+    private String adminPhoneNumber;
+
+    @Value("${data.init.admin.password}")
+    private String adminPassword;
+
     @Autowired
     public DataInitializer(
             CourtRepository courtRepository,
-            SurfaceRepository surfaceRepository
+            SurfaceRepository surfaceRepository,
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder
     ) {
         this.courtRepository = courtRepository;
         this.surfaceRepository = surfaceRepository;
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @PostConstruct
@@ -61,6 +80,7 @@ public class DataInitializer {
 
         var surfacesByName = initSurfaces();
         initCourts(surfacesByName);
+        initAdminUser();
 
         log.info("Data initialization finished");
     }
@@ -88,6 +108,15 @@ public class DataInitializer {
                 .filter(seed -> !existingCourtNumbers.contains(seed.number()))
                 .map(seed -> new Court(seed.name(), seed.number(), new ArrayList<>(), surfacesByName.get(seed.surfaceName())))
                 .forEach(courtRepository::save);
+    }
+
+    private void initAdminUser() {
+        if (userRepository.findByPhoneNumber(adminPhoneNumber).isPresent()) {
+            return;
+        }
+
+        var admin = new User(adminName, adminPhoneNumber, passwordEncoder.encode(adminPassword), Role.ADMIN, new ArrayList<>());
+        userRepository.save(admin);
     }
 
     private record SurfaceSeed(String name, BigDecimal minutePrice) {
