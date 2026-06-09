@@ -1,8 +1,8 @@
 package com.tennisclub.reservations.model.factory;
 
-import com.tennisclub.reservations.dto.UserDto;
-import com.tennisclub.reservations.dto.create.UserCreateDto;
-import com.tennisclub.reservations.model.User;
+import com.tennisclub.reservations.model.dto.UserDto;
+import com.tennisclub.reservations.model.dto.create.UserCreateDto;
+import com.tennisclub.reservations.model.entity.User;
 
 import java.util.ArrayList;
 

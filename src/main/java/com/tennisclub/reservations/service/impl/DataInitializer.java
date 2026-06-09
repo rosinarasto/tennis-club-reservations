@@ -1,8 +1,8 @@
 package com.tennisclub.reservations.service.impl;
 
-import com.tennisclub.reservations.dto.SurfaceDto;
-import com.tennisclub.reservations.dto.create.CourtCreateDto;
-import com.tennisclub.reservations.dto.create.SurfaceCreateDto;
+import com.tennisclub.reservations.model.dto.SurfaceDto;
+import com.tennisclub.reservations.model.dto.create.CourtCreateDto;
+import com.tennisclub.reservations.model.dto.create.SurfaceCreateDto;
 import com.tennisclub.reservations.repository.CourtRepository;
 import com.tennisclub.reservations.repository.SurfaceRepository;
 import com.tennisclub.reservations.service.CourtService;

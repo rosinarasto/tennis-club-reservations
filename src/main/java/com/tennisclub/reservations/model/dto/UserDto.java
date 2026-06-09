@@ -1,5 +1,6 @@
-package com.tennisclub.reservations.dto;
+package com.tennisclub.reservations.model.dto;
 
+import com.tennisclub.reservations.validator.PhoneNumber;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,14 +9,15 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CourtDto extends BaseDto {
+public class UserDto extends BaseDto {
 
     @NotNull
     private String name;
 
+    @PhoneNumber
     @NotNull
-    private Integer number;
+    private String phoneNumber;
 
     @NotNull
-    private SurfaceDto surface;
+    private String password;
 }

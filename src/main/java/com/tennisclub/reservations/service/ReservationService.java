@@ -1,7 +1,7 @@
 package com.tennisclub.reservations.service;
 
-import com.tennisclub.reservations.dto.ReservationDto;
-import com.tennisclub.reservations.dto.create.ReservationCreateDto;
+import com.tennisclub.reservations.model.dto.ReservationDto;
+import com.tennisclub.reservations.model.dto.create.ReservationCreateDto;
 
 import java.time.LocalDateTime;
 

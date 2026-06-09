@@ -2,7 +2,7 @@ package com.tennisclub.reservations.service;
 
 import com.tennisclub.reservations.exception.NotFoundException;
 import com.tennisclub.reservations.exception.ResourceAlreadyExistsException;
-import com.tennisclub.reservations.model.User;
+import com.tennisclub.reservations.model.entity.User;
 import com.tennisclub.reservations.model.factory.ReservationFactory;
 import com.tennisclub.reservations.model.factory.UserFactory;
 import com.tennisclub.reservations.repository.UserRepository;

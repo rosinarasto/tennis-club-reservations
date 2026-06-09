@@ -1,7 +1,7 @@
 package com.tennisclub.reservations.controller;
 
 import com.tennisclub.reservations.config.ApiUris;
-import com.tennisclub.reservations.dto.ReservationDto;
+import com.tennisclub.reservations.model.dto.ReservationDto;
 import com.tennisclub.reservations.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

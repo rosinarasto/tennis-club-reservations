@@ -1,15 +1,15 @@
 package com.tennisclub.reservations.model.factory;
 
-import com.tennisclub.reservations.dto.CourtDto;
-import com.tennisclub.reservations.dto.ReservationDto;
-import com.tennisclub.reservations.dto.SurfaceDto;
-import com.tennisclub.reservations.dto.UserDto;
-import com.tennisclub.reservations.dto.create.ReservationCreateDto;
-import com.tennisclub.reservations.dto.create.UserCreateDto;
-import com.tennisclub.reservations.model.Court;
+import com.tennisclub.reservations.model.dto.CourtDto;
+import com.tennisclub.reservations.model.dto.ReservationDto;
+import com.tennisclub.reservations.model.dto.SurfaceDto;
+import com.tennisclub.reservations.model.dto.UserDto;
+import com.tennisclub.reservations.model.dto.create.ReservationCreateDto;
+import com.tennisclub.reservations.model.dto.create.UserCreateDto;
+import com.tennisclub.reservations.model.entity.Court;
 import com.tennisclub.reservations.model.GameType;
-import com.tennisclub.reservations.model.Reservation;
-import com.tennisclub.reservations.model.User;
+import com.tennisclub.reservations.model.entity.Reservation;
+import com.tennisclub.reservations.model.entity.User;
 
 import java.time.LocalDateTime;
 

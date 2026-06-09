@@ -2,7 +2,7 @@ package com.tennisclub.reservations.service.impl;
 
 import com.tennisclub.reservations.exception.NotFoundException;
 import com.tennisclub.reservations.mapper.GenericMapper;
-import com.tennisclub.reservations.model.BaseEntity;
+import com.tennisclub.reservations.model.entity.BaseEntity;
 import com.tennisclub.reservations.repository.CrudRepository;
 import com.tennisclub.reservations.service.CrudService;
 import jakarta.transaction.Transactional;

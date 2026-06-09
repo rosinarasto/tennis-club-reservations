@@ -1,6 +1,6 @@
 package com.tennisclub.reservations.util;
 
-import com.tennisclub.reservations.dto.ReservationDto;
+import com.tennisclub.reservations.model.dto.ReservationDto;
 import com.tennisclub.reservations.model.GameType;
 
 import java.math.BigDecimal;

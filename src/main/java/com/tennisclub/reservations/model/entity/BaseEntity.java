@@ -1,4 +1,4 @@
-package com.tennisclub.reservations.model;
+package com.tennisclub.reservations.model.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;

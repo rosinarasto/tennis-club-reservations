@@ -1,6 +1,6 @@
 package com.tennisclub.reservations.repository;
 
-import com.tennisclub.reservations.model.User;
+import com.tennisclub.reservations.model.entity.User;
 
 import java.util.Optional;
 

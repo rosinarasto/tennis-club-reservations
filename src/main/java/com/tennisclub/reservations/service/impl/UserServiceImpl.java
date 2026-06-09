@@ -1,13 +1,13 @@
 package com.tennisclub.reservations.service.impl;
 
-import com.tennisclub.reservations.dto.ReservationDto;
-import com.tennisclub.reservations.dto.UserDto;
-import com.tennisclub.reservations.dto.create.UserCreateDto;
+import com.tennisclub.reservations.model.dto.ReservationDto;
+import com.tennisclub.reservations.model.dto.UserDto;
+import com.tennisclub.reservations.model.dto.create.UserCreateDto;
 import com.tennisclub.reservations.exception.NotFoundException;
 import com.tennisclub.reservations.exception.ResourceAlreadyExistsException;
 import com.tennisclub.reservations.mapper.ReservationMapper;
 import com.tennisclub.reservations.mapper.UserMapper;
-import com.tennisclub.reservations.model.User;
+import com.tennisclub.reservations.model.entity.User;
 import com.tennisclub.reservations.repository.UserRepository;
 import com.tennisclub.reservations.service.UserService;
 import jakarta.transaction.Transactional;

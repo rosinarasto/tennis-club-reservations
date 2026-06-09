@@ -1,8 +1,8 @@
 package com.tennisclub.reservations.controller;
 
 import com.tennisclub.reservations.config.ApiUris;
-import com.tennisclub.reservations.dto.ReservationDto;
-import com.tennisclub.reservations.dto.create.ReservationCreateDto;
+import com.tennisclub.reservations.model.dto.ReservationDto;
+import com.tennisclub.reservations.model.dto.create.ReservationCreateDto;
 import com.tennisclub.reservations.service.ReservationService;
 import com.tennisclub.reservations.util.PriceCalculationUtil;
 import jakarta.validation.Valid;

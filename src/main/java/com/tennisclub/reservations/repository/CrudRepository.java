@@ -1,6 +1,6 @@
 package com.tennisclub.reservations.repository;
 
-import com.tennisclub.reservations.model.BaseEntity;
+import com.tennisclub.reservations.model.entity.BaseEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

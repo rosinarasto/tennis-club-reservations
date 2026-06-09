@@ -1,6 +1,6 @@
 package com.tennisclub.reservations.mapper;
 
-import com.tennisclub.reservations.model.BaseEntity;
+import com.tennisclub.reservations.model.entity.BaseEntity;
 
 /**
  * GenericMapper interface for mapping between entities and various types of DTOs.

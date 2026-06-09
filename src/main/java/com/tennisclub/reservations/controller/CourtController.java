@@ -1,9 +1,9 @@
 package com.tennisclub.reservations.controller;
 
 import com.tennisclub.reservations.config.ApiUris;
-import com.tennisclub.reservations.dto.CourtDto;
-import com.tennisclub.reservations.dto.ReservationDto;
-import com.tennisclub.reservations.dto.create.CourtCreateDto;
+import com.tennisclub.reservations.model.dto.CourtDto;
+import com.tennisclub.reservations.model.dto.ReservationDto;
+import com.tennisclub.reservations.model.dto.create.CourtCreateDto;
 import com.tennisclub.reservations.service.CourtService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;

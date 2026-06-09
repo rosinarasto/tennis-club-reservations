@@ -1,8 +1,8 @@
 package com.tennisclub.reservations.service;
 
-import com.tennisclub.reservations.dto.SurfaceDto;
-import com.tennisclub.reservations.dto.create.SurfaceCreateDto;
-import com.tennisclub.reservations.model.Surface;
+import com.tennisclub.reservations.model.dto.SurfaceDto;
+import com.tennisclub.reservations.model.dto.create.SurfaceCreateDto;
+import com.tennisclub.reservations.model.entity.Surface;
 import com.tennisclub.reservations.repository.CrudRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

@@ -1,6 +1,6 @@
 package com.tennisclub.reservations.repository;
 
-import com.tennisclub.reservations.model.Surface;
+import com.tennisclub.reservations.model.entity.Surface;
 import com.tennisclub.reservations.model.factory.SurfaceFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;

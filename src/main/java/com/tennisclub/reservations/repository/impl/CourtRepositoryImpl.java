@@ -1,6 +1,6 @@
 package com.tennisclub.reservations.repository.impl;
 
-import com.tennisclub.reservations.model.Court;
+import com.tennisclub.reservations.model.entity.Court;
 import com.tennisclub.reservations.repository.CourtRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;

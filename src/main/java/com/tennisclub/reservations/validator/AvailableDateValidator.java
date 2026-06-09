@@ -1,6 +1,6 @@
 package com.tennisclub.reservations.validator;
 
-import com.tennisclub.reservations.dto.CourtDto;
+import com.tennisclub.reservations.model.dto.CourtDto;
 import com.tennisclub.reservations.service.ReservationService;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;

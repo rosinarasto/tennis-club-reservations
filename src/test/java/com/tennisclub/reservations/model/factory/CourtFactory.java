@@ -1,11 +1,11 @@
 package com.tennisclub.reservations.model.factory;
 
-import com.tennisclub.reservations.dto.CourtDto;
-import com.tennisclub.reservations.dto.SurfaceDto;
-import com.tennisclub.reservations.dto.create.CourtCreateDto;
-import com.tennisclub.reservations.model.Court;
-import com.tennisclub.reservations.model.Reservation;
-import com.tennisclub.reservations.model.Surface;
+import com.tennisclub.reservations.model.dto.CourtDto;
+import com.tennisclub.reservations.model.dto.SurfaceDto;
+import com.tennisclub.reservations.model.dto.create.CourtCreateDto;
+import com.tennisclub.reservations.model.entity.Court;
+import com.tennisclub.reservations.model.entity.Reservation;
+import com.tennisclub.reservations.model.entity.Surface;
 
 import java.util.List;
 

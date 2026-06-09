@@ -1,5 +1,6 @@
-package com.tennisclub.reservations.model;
+package com.tennisclub.reservations.model.entity;
 
+import com.tennisclub.reservations.model.GameType;
 import jakarta.persistence.*;
 import lombok.*;
 

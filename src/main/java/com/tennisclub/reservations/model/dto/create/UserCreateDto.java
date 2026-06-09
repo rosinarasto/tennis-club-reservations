@@ -1,4 +1,4 @@
-package com.tennisclub.reservations.dto.create;
+package com.tennisclub.reservations.model.dto.create;
 
 import com.tennisclub.reservations.validator.PhoneNumber;
 import jakarta.validation.constraints.NotNull;
