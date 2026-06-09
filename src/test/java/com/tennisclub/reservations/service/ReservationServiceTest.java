@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,21 +41,21 @@ public class ReservationServiceTest {
     public void createReservation_newUser() {
         var user = UserFactory.createUser("gg", "123456789");
         var userDTO = UserFactory.createCreateDto("gg", "123456789");
+        var court = CourtFactory.createCourt(4, new ArrayList<>());
 
         when(userRepository.findByPhoneNumber("123456789"))
-                .thenReturn(Optional.empty());
-
-        when(userRepository.findByName("gg"))
-                .thenReturn(Optional.empty());
+                .thenReturn(Optional.empty(), Optional.empty(), Optional.of(user));
 
         when(userRepository.save(any(User.class)))
                 .thenReturn(user);
 
-        var reservation = ReservationFactory.createReservation(getTime(12, 0), getTime(13, 30));
+        when(courtRepository.findByCourtNumber(4))
+                .thenReturn(Optional.of(court));
+
         var reservationDTOs = ReservationFactory.createCreateDto(getTime(12, 0), getTime(13, 30), userDTO);
 
         when(reservationRepository.save(any(Reservation.class)))
-                .thenReturn(reservation);
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         var actual = reservationService.create(reservationDTOs);
 
@@ -67,21 +68,18 @@ public class ReservationServiceTest {
     public void createReservation_existingUser() {
         var user = UserFactory.createUser("gg", "123456789");
         var userDTO = UserFactory.createCreateDto("gg", "123456789");
+        var court = CourtFactory.createCourt(4, new ArrayList<>());
 
         when(userRepository.findByPhoneNumber("123456789"))
-                .thenReturn(Optional.empty());
+                .thenReturn(Optional.of(user));
 
-        when(userRepository.findByName("gg"))
-            .thenReturn(Optional.empty());
+        when(courtRepository.findByCourtNumber(4))
+                .thenReturn(Optional.of(court));
 
-        when(userRepository.save(any(User.class)))
-            .thenReturn(user);
-
-        var reservation = ReservationFactory.createReservation(getTime(12, 0), getTime(13, 30));
         var reservationDTOs = ReservationFactory.createCreateDto(getTime(12, 0), getTime(13, 30), userDTO);
 
         when(reservationRepository.save(any(Reservation.class)))
-                .thenReturn(reservation);
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         var actual = reservationService.create(reservationDTOs);
 
@@ -116,6 +114,34 @@ public class ReservationServiceTest {
                 .thenReturn(Optional.of(court));
 
         assertThat(reservationService.isDateAvailable(4, getTime(12, 30), getTime(13, 15))).isFalse();
+    }
+
+    @Test
+    public void isDateAvailable_falseWhenExactSameInterval() {
+        var reservations = List.of(
+                ReservationFactory.createReservation(getTime(12, 0), getTime(13, 30))
+        );
+
+        var court = CourtFactory.createCourt(4, reservations);
+
+        when(courtRepository.findByCourtNumber(4))
+                .thenReturn(Optional.of(court));
+
+        assertThat(reservationService.isDateAvailable(4, getTime(12, 0), getTime(13, 30))).isFalse();
+    }
+
+    @Test
+    public void isDateAvailable_falseWhenNewIntervalContainsExistingReservation() {
+        var reservations = List.of(
+                ReservationFactory.createReservation(getTime(12, 0), getTime(13, 30))
+        );
+
+        var court = CourtFactory.createCourt(4, reservations);
+
+        when(courtRepository.findByCourtNumber(4))
+                .thenReturn(Optional.of(court));
+
+        assertThat(reservationService.isDateAvailable(4, getTime(11, 30), getTime(14, 0))).isFalse();
     }
 
     @Test

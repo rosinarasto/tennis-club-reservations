@@ -2,9 +2,10 @@ package com.tennisclub.reservations.service.impl;
 
 import com.tennisclub.reservations.dto.ReservationDto;
 import com.tennisclub.reservations.dto.create.ReservationCreateDto;
+import com.tennisclub.reservations.exception.NotFoundException;
 import com.tennisclub.reservations.mapper.ReservationMapper;
-import com.tennisclub.reservations.mapper.UserMapper;
 import com.tennisclub.reservations.model.Reservation;
+import com.tennisclub.reservations.model.User;
 import com.tennisclub.reservations.repository.CourtRepository;
 import com.tennisclub.reservations.repository.ReservationRepository;
 import com.tennisclub.reservations.repository.UserRepository;
@@ -16,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 @Service
 @Slf4j
@@ -29,19 +29,17 @@ public class ReservationServiceImpl extends GenericCrudService<Reservation, Rese
     private final UserRepository userRepository;
     private final ReservationRepository reservationRepository;
 
-    private final UserMapper userMapper;
     private final ReservationMapper reservationMapper;
 
     @Autowired
     public ReservationServiceImpl(ReservationRepository reservationRepository, ReservationMapper mapper,
                                   UserRepository userRepository, UserService userService,
-                                  UserMapper userMapper, CourtRepository courtRepository) {
+                                  CourtRepository courtRepository) {
         super(reservationRepository, mapper, ReservationDto.class, Reservation.class);
         this.reservationRepository = reservationRepository;
         this.userRepository = userRepository;
         this.userService = userService;
         this.reservationMapper = mapper;
-        this.userMapper = userMapper;
         this.courtRepository = courtRepository;
     }
 
@@ -49,19 +47,18 @@ public class ReservationServiceImpl extends GenericCrudService<Reservation, Rese
     public ReservationDto create(ReservationCreateDto createDto) {
         log.info("Creating new reservation {}", createDto);
 
-        var user = userRepository.findByPhoneNumber(createDto.getUser().getPhoneNumber());
-        if (user.isEmpty()) {
-            user = userRepository.findByName(createDto.getUser().getName());
-            if (user.isEmpty()) {
-                user = Optional.of(userMapper.toEntityFromDto(userService.create(createDto.getUser())));
-            }
-        }
+        var user = getOrCreateUser(createDto);
+        var court = courtRepository.findByCourtNumber(createDto.getCourt().getNumber())
+                .orElseThrow(() -> new NotFoundException("Court with number " + createDto.getCourt().getNumber() + " not found"));
 
         var reservation = reservationMapper.toEntityFromCreateDto(createDto);
-        reservation = reservationRepository.save(reservation);
-        reservation.setUser(user.get());
+        reservation.setUser(user);
+        reservation.setCourt(court);
 
-        user.get().getReservations().add(reservation);
+        reservation = reservationRepository.save(reservation);
+
+        user.getReservations().add(reservation);
+        court.getReservations().add(reservation);
 
         return reservationMapper.toDto(reservation);
     }
@@ -72,8 +69,21 @@ public class ReservationServiceImpl extends GenericCrudService<Reservation, Rese
         var court = courtRepository.findByCourtNumber(number);
 
         return court.map(value -> value.getReservations().stream()
-                .noneMatch(res -> (from.isAfter(res.getFrom()) && from.isBefore(res.getTo())) ||
-                                  (to.isAfter(res.getFrom())   && to.isBefore(res.getTo()))))
+                .filter(res -> !res.isDeleted())
+                .noneMatch(res -> from.isBefore(res.getTo()) && to.isAfter(res.getFrom())))
                 .orElse(false);
+    }
+
+    private User getOrCreateUser(ReservationCreateDto createDto) {
+        var phoneNumber = createDto.getUser().getPhoneNumber();
+
+        var user = userRepository.findByPhoneNumber(phoneNumber);
+        if (user.isPresent()) {
+            return user.get();
+        }
+
+        userService.create(createDto.getUser());
+        return userRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new NotFoundException("User with phone number " + phoneNumber + " not found"));
     }
 }
