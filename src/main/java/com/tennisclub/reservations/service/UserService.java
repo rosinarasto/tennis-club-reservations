@@ -5,7 +5,7 @@ import com.tennisclub.reservations.model.entity.User;
 /**
  * Defines user-specific business operations.
  */
-public interface UserService extends CrudService<User> {
+public interface UserService {
 
     /**
      * Creates a new user.

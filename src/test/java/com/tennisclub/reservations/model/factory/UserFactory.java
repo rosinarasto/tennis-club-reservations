@@ -2,6 +2,7 @@ package com.tennisclub.reservations.model.factory;
 
 import com.tennisclub.reservations.model.dto.UserDto;
 import com.tennisclub.reservations.model.dto.create.UserCreateDto;
+import com.tennisclub.reservations.model.Role;
 import com.tennisclub.reservations.model.entity.User;
 
 import java.util.ArrayList;
@@ -13,18 +14,18 @@ public class UserFactory {
     private static final String DEFAULT_PASSWORD = "password";
 
     public static User createUser() {
-        return new User(DEFAULT_NAME, DEFAULT_PHONE_NUMBER, DEFAULT_PASSWORD, null);
+        return new User(DEFAULT_NAME, DEFAULT_PHONE_NUMBER, DEFAULT_PASSWORD, Role.USER, new ArrayList<>());
     }
 
     public static User createUser(String name, String phoneNumber) {
-        return new User(name, phoneNumber, DEFAULT_PASSWORD, new ArrayList<>());
+        return new User(name, phoneNumber, DEFAULT_PASSWORD, Role.USER, new ArrayList<>());
     }
 
     public static UserDto createDto() {
-        return new UserDto(DEFAULT_NAME, DEFAULT_PHONE_NUMBER, DEFAULT_PASSWORD);
+        return new UserDto(DEFAULT_NAME, DEFAULT_PHONE_NUMBER);
     }
 
     public static UserCreateDto createCreateDto() {
-        return new UserCreateDto(DEFAULT_NAME, DEFAULT_PHONE_NUMBER, DEFAULT_PASSWORD);
+        return new UserCreateDto(DEFAULT_NAME, DEFAULT_PHONE_NUMBER);
     }
 }
