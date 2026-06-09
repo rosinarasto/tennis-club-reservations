@@ -3,6 +3,7 @@ package com.tennisclub.reservations.validator;
 import com.tennisclub.reservations.model.factory.CourtFactory;
 import com.tennisclub.reservations.model.factory.ReservationFactory;
 import com.tennisclub.reservations.service.ReservationService;
+import com.tennisclub.reservations.validator.annotation.AvailableDate;
 import org.hibernate.validator.internal.util.annotation.AnnotationDescriptor;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

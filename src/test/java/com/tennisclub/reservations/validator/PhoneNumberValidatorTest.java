@@ -1,6 +1,7 @@
 package com.tennisclub.reservations.validator;
 
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
+import com.tennisclub.reservations.validator.annotation.PhoneNumber;
 import org.hibernate.validator.internal.util.annotation.AnnotationDescriptor;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;

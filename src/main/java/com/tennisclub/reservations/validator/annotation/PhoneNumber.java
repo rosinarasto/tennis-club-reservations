@@ -1,5 +1,6 @@
-package com.tennisclub.reservations.validator;
+package com.tennisclub.reservations.validator.annotation;
 
+import com.tennisclub.reservations.validator.PhoneNumberValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 

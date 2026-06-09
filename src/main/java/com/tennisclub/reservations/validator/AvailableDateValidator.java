@@ -2,6 +2,7 @@ package com.tennisclub.reservations.validator;
 
 import com.tennisclub.reservations.model.dto.CourtDto;
 import com.tennisclub.reservations.service.ReservationService;
+import com.tennisclub.reservations.validator.annotation.AvailableDate;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import lombok.extern.slf4j.Slf4j;

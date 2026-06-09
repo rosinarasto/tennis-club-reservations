@@ -7,9 +7,18 @@ import com.tennisclub.reservations.model.entity.BaseEntity;
  *
  * @param <TModel> the type of the Entity
  * @param <TDto> the type of the main Data Transfer Object
+ * @param <TCreateDto> the type of the TDto used for creating a new entity
  * @param <TUpdateDto> the type of the TDto used for updating an existing entity
  */
-public interface GenericMapper<TModel extends BaseEntity, TDto, TUpdateDto> {
+public interface GenericMapper<TModel extends BaseEntity, TDto, TCreateDto, TUpdateDto> {
+
+    /**
+     * Converts a TCreateDto to an Entity.
+     *
+     * @param dto the TCreateDto to convert
+     * @return the corresponding Entity
+     */
+    TModel toEntityFromCreateDto(TCreateDto dto);
 
     /**
      * Converts an TUpdateDto to an Entity.
