@@ -11,6 +11,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -47,6 +49,19 @@ public class AvailableDateValidatorTest {
                 .thenReturn(false);
 
         assertThat(validator.isValid(reservationCreateDto, null)).isFalse();
+    }
+
+    @Test
+    public void isValid_givenInvalidTimeRange_returnsFalse() {
+        var validator = new AvailableDateValidator(reservationService);
+        var constraintAnnotation = new AnnotationDescriptor.Builder<>(AvailableDate.class).build().getAnnotation();
+        validator.initialize(constraintAnnotation);
+
+        var courtDto = CourtFactory.createDto(4);
+        var reservationCreateDto = ReservationFactory.createCreateDto(courtDto, getTime(13, 15), getTime(12, 0));
+
+        assertThat(validator.isValid(reservationCreateDto, null)).isFalse();
+        verify(reservationService, never()).isDateAvailable(courtDto.getNumber(), getTime(13, 15), getTime(12, 0));
     }
 
     private LocalDateTime getTime(int hour, int minute) {

@@ -48,6 +48,10 @@ public class AvailableDateValidator implements ConstraintValidator<AvailableDate
             return false;
         }
 
+        if (courtDto == null || from == null || to == null || !from.isBefore(to)) {
+            return false;
+        }
+
         return reservationService.isDateAvailable(courtDto.getNumber(), from, to);
     }
 }
