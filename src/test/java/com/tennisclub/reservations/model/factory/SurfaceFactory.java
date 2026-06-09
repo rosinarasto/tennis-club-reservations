@@ -1,8 +1,8 @@
 package com.tennisclub.reservations.model.factory;
 
-import com.tennisclub.reservations.dto.SurfaceDto;
-import com.tennisclub.reservations.dto.create.SurfaceCreateDto;
-import com.tennisclub.reservations.model.Surface;
+import com.tennisclub.reservations.model.dto.SurfaceDto;
+import com.tennisclub.reservations.model.dto.create.SurfaceCreateDto;
+import com.tennisclub.reservations.model.entity.Surface;
 
 import java.math.BigDecimal;
 
@@ -17,10 +17,6 @@ public class SurfaceFactory {
 
     public static Surface createSurface() {
         return new Surface(DEFAULT_MINUTE_PRICE, DEFAULT_NAME, null);
-    }
-
-    public static SurfaceDto createDto(BigDecimal price) {
-        return new SurfaceDto(price, DEFAULT_NAME);
     }
 
     public static SurfaceCreateDto createCreateDto(String name) {

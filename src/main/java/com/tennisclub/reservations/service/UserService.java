@@ -1,12 +1,25 @@
 package com.tennisclub.reservations.service;
 
-import com.tennisclub.reservations.dto.ReservationDto;
-import com.tennisclub.reservations.dto.UserDto;
-import com.tennisclub.reservations.dto.create.UserCreateDto;
+import com.tennisclub.reservations.model.entity.User;
 
-import java.util.List;
+/**
+ * Defines user-specific business operations.
+ */
+public interface UserService extends CrudService<User> {
 
-public interface UserService extends CrudService<UserDto, UserCreateDto, UserDto> {
+    /**
+     * Creates a new user.
+     *
+     * @param newUser user to create.
+     * @return created user.
+     */
+    User create(User newUser);
 
-    List<ReservationDto> findReservations(String phoneNumber, boolean future);
+    /**
+     * Finds an existing user by phone number or creates a new one.
+     *
+     * @param user user data used for lookup or creation.
+     * @return existing or newly created user.
+     */
+    User getOrCreate(User user);
 }

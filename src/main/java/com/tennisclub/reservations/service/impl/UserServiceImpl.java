@@ -1,13 +1,8 @@
 package com.tennisclub.reservations.service.impl;
 
-import com.tennisclub.reservations.dto.ReservationDto;
-import com.tennisclub.reservations.dto.UserDto;
-import com.tennisclub.reservations.dto.create.UserCreateDto;
 import com.tennisclub.reservations.exception.NotFoundException;
 import com.tennisclub.reservations.exception.ResourceAlreadyExistsException;
-import com.tennisclub.reservations.mapper.ReservationMapper;
-import com.tennisclub.reservations.mapper.UserMapper;
-import com.tennisclub.reservations.model.User;
+import com.tennisclub.reservations.model.entity.User;
 import com.tennisclub.reservations.repository.UserRepository;
 import com.tennisclub.reservations.service.UserService;
 import jakarta.transaction.Transactional;
@@ -16,34 +11,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-
 @Service
 @Slf4j
 @Transactional
-public class UserServiceImpl extends GenericCrudService<User, UserDto, UserCreateDto, UserDto> implements UserService {
+public class UserServiceImpl extends GenericCrudService<User> implements UserService {
 
     private final UserRepository userRepository;
-
-    private final UserMapper userMapper;
-    private final ReservationMapper reservationMapper;
 
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserServiceImpl(UserRepository repository, UserMapper mapper,
-                           ReservationMapper reservationMapper, PasswordEncoder passwordEncoder) {
-        super(repository, mapper, UserDto.class, User.class);
+    public UserServiceImpl(UserRepository repository, PasswordEncoder passwordEncoder) {
+        super(repository);
         this.userRepository = repository;
-        this.userMapper = mapper;
-        this.reservationMapper = reservationMapper;
         this.passwordEncoder = passwordEncoder;
     }
 
     @Override
-    public UserDto create(UserCreateDto newUser) {
+    public User create(User newUser) {
         log.info("Creating new User: {}", newUser);
 
         var userByPhoneNumber = userRepository.findByPhoneNumber(newUser.getPhoneNumber());
@@ -52,40 +37,29 @@ public class UserServiceImpl extends GenericCrudService<User, UserDto, UserCreat
             throw new ResourceAlreadyExistsException("user with given phone number already exists");
         }
 
-        var userByName = userRepository.findByName(newUser.getName());
+        newUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
 
-        if (userByName.isPresent()) {
-            throw new ResourceAlreadyExistsException("user with given name already exists");
-        }
-
-        var user = userMapper.toEntityFromCreateDto(newUser);
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-
-        return userMapper.toDto(userRepository.save(user));
+        return userRepository.save(newUser);
     }
 
     @Override
-    public UserDto update(UserDto updateUser) {
+    public User getOrCreate(User user) {
+        log.info("Finding or creating user with phone number {}", user.getPhoneNumber());
+
+        return userRepository.findByPhoneNumber(user.getPhoneNumber())
+                .orElseGet(() -> create(user));
+    }
+
+    @Override
+    public User update(User updateUser) {
         log.info("Updating User: {}", updateUser);
 
-        var user = userMapper.toEntityFromUpdateDto(updateUser);
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        updateUser.setPassword(passwordEncoder.encode(updateUser.getPassword()));
 
-        if (findById(user.getId()).isPresent())
-            return userMapper.toDto(userRepository.update(user));
+        if (findById(updateUser.getId()).isPresent()) {
+            return userRepository.update(updateUser);
+        }
 
         throw new NotFoundException("User " + updateUser + "not found");
-    }
-
-    @Override
-    public List<ReservationDto> findReservations(String phoneNumber, boolean future) {
-        var user = userRepository.findByPhoneNumber(phoneNumber);
-
-        return user.map(value ->
-                        value.getReservations().stream()
-                            .map(reservationMapper::toDto)
-                                .filter(res -> !future || res.getFrom().isAfter(LocalDateTime.now()))
-                                .toList())
-                    .orElse(Collections.emptyList());
     }
 }

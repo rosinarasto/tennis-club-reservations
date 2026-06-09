@@ -1,12 +1,25 @@
 package com.tennisclub.reservations.service;
 
-import com.tennisclub.reservations.dto.CourtDto;
-import com.tennisclub.reservations.dto.ReservationDto;
-import com.tennisclub.reservations.dto.create.CourtCreateDto;
+import com.tennisclub.reservations.model.entity.Court;
 
-import java.util.List;
+/**
+ * Defines court-specific business operations.
+ */
+public interface CourtService extends CrudService<Court> {
 
-public interface CourtService extends CrudService<CourtDto, CourtCreateDto, CourtDto> {
+    /**
+     * Creates a new court.
+     *
+     * @param newCourt court to create.
+     * @return created court.
+     */
+    Court create(Court newCourt);
 
-    List<ReservationDto> findReservations(int number);
+    /**
+     * Finds a court by its court number.
+     *
+     * @param number court number.
+     * @return found court.
+     */
+    Court findByNumber(int number);
 }

@@ -1,4 +1,4 @@
-package com.tennisclub.reservations.model;
+package com.tennisclub.reservations.model.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -11,6 +11,10 @@ import java.time.LocalDateTime;
 @Getter @Setter
 @ToString
 public abstract class BaseEntity {
+
+    public static final String FIELD_ID = "id";
+    public static final String FIELD_CREATION_DATE = "creationDate";
+    public static final String FIELD_DELETED = "deleted";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

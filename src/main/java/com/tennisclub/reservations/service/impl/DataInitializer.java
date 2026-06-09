@@ -1,45 +1,54 @@
 package com.tennisclub.reservations.service.impl;
 
-import com.tennisclub.reservations.dto.SurfaceDto;
-import com.tennisclub.reservations.dto.create.CourtCreateDto;
-import com.tennisclub.reservations.dto.create.SurfaceCreateDto;
+import com.tennisclub.reservations.model.entity.Court;
+import com.tennisclub.reservations.model.entity.Surface;
 import com.tennisclub.reservations.repository.CourtRepository;
 import com.tennisclub.reservations.repository.SurfaceRepository;
-import com.tennisclub.reservations.service.CourtService;
-import com.tennisclub.reservations.service.SurfaceService;
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 @Transactional
 public class DataInitializer {
 
-    private final CourtService courtService;
-    private final SurfaceService surfaceService;
-
     private final CourtRepository courtRepository;
     private final SurfaceRepository surfaceRepository;
 
-    private final List<SurfaceDto> surfaces = new ArrayList<>();
+    private static final PageRequest INIT_PAGE = PageRequest.of(0, Integer.MAX_VALUE);
+
+    private static final List<SurfaceSeed> SURFACES = List.of(
+            new SurfaceSeed("Hard", BigDecimal.valueOf(0.24)),
+            new SurfaceSeed("Clay", BigDecimal.valueOf(0.36))
+    );
+
+    private static final List<CourtSeed> COURTS = List.of(
+            new CourtSeed("Emerald Bay Tennis Center", 1, "Hard"),
+            new CourtSeed("Riverside Racket Club", 2, "Clay"),
+            new CourtSeed("Sunset Point Tennis Courts", 3, "Clay"),
+            new CourtSeed("Grandview Athletic Park", 4, "Hard")
+    );
 
     @Value("${data.init.enabled:false}")
     private boolean dataInitEnabled;
 
     @Autowired
-    public DataInitializer(CourtService courtService, CourtRepository courtRepository,
-                           SurfaceService surfaceService, SurfaceRepository surfaceRepository) {
-        this.courtService = courtService;
+    public DataInitializer(
+            CourtRepository courtRepository,
+            SurfaceRepository surfaceRepository
+    ) {
         this.courtRepository = courtRepository;
-        this.surfaceService = surfaceService;
         this.surfaceRepository = surfaceRepository;
     }
 
@@ -50,27 +59,40 @@ public class DataInitializer {
 
         log.info("Data initialization started");
 
-        initSurfaces();
-        initCourts();
+        var surfacesByName = initSurfaces();
+        initCourts(surfacesByName);
 
         log.info("Data initialization finished");
     }
 
-    private void initSurfaces() {
-        if (surfaceRepository.findByName("Hard").isEmpty())
-            surfaces.add(surfaceService.create(new SurfaceCreateDto(BigDecimal.valueOf(0.24), "Hard")));
-        if (surfaceRepository.findByName("Clay").isEmpty())
-            surfaces.add(surfaceService.create(new SurfaceCreateDto(BigDecimal.valueOf(0.36), "Clay")));
+    private HashMap<String, Surface> initSurfaces() {
+        var surfacesByName = new HashMap<String, Surface>();
+
+        surfaceRepository.findAll(INIT_PAGE)
+                .forEach(surface -> surfacesByName.put(surface.getName(), surface));
+
+        SURFACES.stream()
+                .filter(seed -> !surfacesByName.containsKey(seed.name()))
+                .map(seed -> surfaceRepository.save(new Surface(seed.minutePrice(), seed.name(), new ArrayList<>())))
+                .forEach(surface -> surfacesByName.put(surface.getName(), surface));
+
+        return surfacesByName;
     }
 
-    private void initCourts() {
-        if (courtRepository.findByCourtNumber(1).isEmpty())
-            courtService.create(new CourtCreateDto("Emerald Bay Tennis Center", 1, surfaces.get(0)));
-        if (courtRepository.findByCourtNumber(2).isEmpty())
-            courtService.create(new CourtCreateDto("Riverside Racket Club", 2, surfaces.get(1)));
-        if (courtRepository.findByCourtNumber(3).isEmpty())
-            courtService.create(new CourtCreateDto("Sunset Point Tennis Courts", 3, surfaces.get(1)));
-        if (courtRepository.findByCourtNumber(4).isEmpty())
-            courtService.create(new CourtCreateDto("Grandview Athletic Park", 4, surfaces.get(0)));
+    private void initCourts(HashMap<String, Surface> surfacesByName) {
+        var existingCourtNumbers = courtRepository.findAll(INIT_PAGE).stream()
+                .map(Court::getNumber)
+                .collect(Collectors.toSet());
+
+        COURTS.stream()
+                .filter(seed -> !existingCourtNumbers.contains(seed.number()))
+                .map(seed -> new Court(seed.name(), seed.number(), new ArrayList<>(), surfacesByName.get(seed.surfaceName())))
+                .forEach(courtRepository::save);
+    }
+
+    private record SurfaceSeed(String name, BigDecimal minutePrice) {
+    }
+
+    private record CourtSeed(String name, int number, String surfaceName) {
     }
 }

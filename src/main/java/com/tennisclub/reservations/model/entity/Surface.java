@@ -1,4 +1,4 @@
-package com.tennisclub.reservations.model;
+package com.tennisclub.reservations.model.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -18,6 +18,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Surface extends BaseEntity {
+
+    public static final String FIELD_NAME = "name";
 
     @Column(name = "minute_price")
     private BigDecimal minutePrice;

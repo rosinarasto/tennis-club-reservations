@@ -1,6 +1,6 @@
 package com.tennisclub.reservations.repository;
 
-import com.tennisclub.reservations.model.Surface;
+import com.tennisclub.reservations.model.entity.Surface;
 import com.tennisclub.reservations.model.factory.SurfaceFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -75,6 +75,17 @@ public class CrudRepositoryTest {
         assertThat(actual.getTotalElements()).isEqualTo(2);
         assertThat(actual.getContent().get(0).getName()).isEqualTo("grass");
         assertThat(actual.getContent().get(1).getName()).isEqualTo("clay");
+    }
+
+    @Test
+    public void findAll_returnsTotalElementsForAllPages() {
+        em.persist(SurfaceFactory.createSurface("grass"));
+        em.persist(SurfaceFactory.createSurface("clay"));
+
+        var actual = repository.findAll(PageRequest.of(1, 1));
+
+        assertThat(actual.getTotalElements()).isEqualTo(2);
+        assertThat(actual.getContent().size()).isEqualTo(1);
     }
 
     @Test

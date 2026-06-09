@@ -1,10 +1,9 @@
 package com.tennisclub.reservations.controller;
 
 import com.tennisclub.reservations.config.ApiUris;
-import com.tennisclub.reservations.dto.ReservationDto;
-import com.tennisclub.reservations.dto.UserDto;
-import com.tennisclub.reservations.dto.create.UserCreateDto;
-import com.tennisclub.reservations.service.UserService;
+import com.tennisclub.reservations.mapper.ReservationMapper;
+import com.tennisclub.reservations.model.dto.ReservationDto;
+import com.tennisclub.reservations.service.ReservationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,19 +12,20 @@ import java.util.List;
 
 @RestController
 @RequestMapping(ApiUris.USER_URI)
-public class UserController extends GenericCrudController<UserDto, UserCreateDto, UserDto> {
+public class UserController {
 
-    private final UserService userService;
+    private final ReservationService reservationService;
+    private final ReservationMapper reservationMapper;
 
     @Autowired
-    public UserController(UserService service) {
-        super(service);
-        this.userService = service;
+    public UserController(ReservationService reservationService, ReservationMapper reservationMapper) {
+        this.reservationService = reservationService;
+        this.reservationMapper = reservationMapper;
     }
 
     @GetMapping(ApiUris.USER_RESERVATIONS_URI)
     public ResponseEntity<List<ReservationDto>> getUserReservations(@PathVariable String phoneNumber, @RequestParam(required = false) boolean future) {
-        var reservations = userService.findReservations(phoneNumber, future);
-        return ResponseEntity.ok().body(reservations);
+        var reservations = reservationService.findByUserPhoneNumber(phoneNumber, future);
+        return ResponseEntity.ok().body(reservations.stream().map(reservationMapper::toDto).toList());
     }
 }

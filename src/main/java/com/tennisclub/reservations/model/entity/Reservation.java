@@ -1,5 +1,6 @@
-package com.tennisclub.reservations.model;
+package com.tennisclub.reservations.model.entity;
 
+import com.tennisclub.reservations.model.GameType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,6 +14,11 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Reservation extends BaseEntity {
+
+    public static final String FIELD_FROM = "from";
+    public static final String FIELD_TO = "to";
+    public static final String FIELD_USER = "user";
+    public static final String FIELD_COURT = "court";
 
     @Column(name = "from_date")
     private LocalDateTime from;

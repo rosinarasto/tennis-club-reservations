@@ -1,52 +1,63 @@
 package com.tennisclub.reservations.repository;
 
-import com.tennisclub.reservations.model.BaseEntity;
+import com.tennisclub.reservations.model.entity.BaseEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.Optional;
 
 /**
- * Represents a repository for any entity.
+ * Defines common repository operations for entities that support soft deletion.
  *
- * @param <T> the type of the entity.
+ * @param <TEntity> the type of the entity.
  */
-public interface CrudRepository<T extends BaseEntity> {
+public interface CrudRepository<TEntity extends BaseEntity> {
 
     /**
-     * Persist given {@code newEntity}.
+     * Persists the given {@code newEntity}.
      *
+     * @param newEntity entity to persist.
      * @return the persisted entity with generated id.
      */
-    T save(T newEntity);
+    TEntity save(TEntity newEntity);
 
 
     /**
-     * Update given {@code entity}.
+     * Updates the given {@code entity}.
      *
+     * @param entity entity with updated values.
      * @return the updated entity.
      */
-    T update(T entity);
+    TEntity update(TEntity entity);
 
     /**
-     * Find entity with given {@code id}.
+     * Finds an entity with the given {@code id}.
      *
-     * @return optional with found entity, or empty optional if no entity with given {@code id} is found
+     * @param id entity id.
+     * @return optional with found entity, or empty optional if no entity with given {@code id} is found.
      */
-    Optional<T> findById(Long id);
+    Optional<TEntity> findById(Long id);
 
     /**
-     * Find all entities for pageable.
+     * Finds all non-deleted entities for the requested page.
+     *
+     * @param pageable requested page and sorting.
+     * @return page with found entities.
      */
-    Page<T> findAll(Pageable pageable);
+    Page<TEntity> findAll(Pageable pageable);
 
     /**
-     * Soft delete entity with given {@code id}.
+     * Soft deletes an entity with the given {@code id}.
+     *
+     * @param id entity id.
+     * @return optional with deleted entity, or empty optional if no entity with given {@code id} is found.
      */
-    void softDeleteById(Long id);
+    Optional<TEntity> softDeleteById(Long id);
 
     /**
-     * Soft delete all entities from pageable.
+     * Soft deletes all non-deleted entities from the requested page.
+     *
+     * @param pageable requested page and sorting.
      */
     void softDeleteAll(Pageable pageable);
 }

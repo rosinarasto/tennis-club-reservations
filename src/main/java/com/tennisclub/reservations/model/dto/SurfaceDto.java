@@ -1,4 +1,4 @@
-package com.tennisclub.reservations.dto;
+package com.tennisclub.reservations.model.dto;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;

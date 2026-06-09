@@ -1,8 +1,7 @@
 package com.tennisclub.reservations.service.impl;
 
 import com.tennisclub.reservations.exception.NotFoundException;
-import com.tennisclub.reservations.mapper.GenericMapper;
-import com.tennisclub.reservations.model.BaseEntity;
+import com.tennisclub.reservations.model.entity.BaseEntity;
 import com.tennisclub.reservations.repository.CrudRepository;
 import com.tennisclub.reservations.service.CrudService;
 import jakarta.transaction.Transactional;
@@ -14,71 +13,44 @@ import java.util.Optional;
 
 @Slf4j
 @Transactional
-public abstract class GenericCrudService<TModel extends BaseEntity, TDto, TCreateDto, TUpdateDto> implements CrudService<TDto, TCreateDto, TUpdateDto> {
+public abstract class GenericCrudService<TEntity extends BaseEntity> implements CrudService<TEntity> {
 
-    public final CrudRepository<TModel> repository;
-    public final GenericMapper<TModel, TDto, TCreateDto, TUpdateDto> mapper;
+    private final CrudRepository<TEntity> repository;
 
-    public final Class<TDto> dtoClass;
-    public final Class<TModel> modelClass;
-
-    public GenericCrudService(CrudRepository<TModel> repository,
-                              GenericMapper<TModel, TDto, TCreateDto, TUpdateDto> mapper,
-                              Class<TDto> dtoClass, Class<TModel> modelClass) {
+    protected GenericCrudService(CrudRepository<TEntity> repository) {
         this.repository = repository;
-        this.mapper = mapper;
-        this.dtoClass = dtoClass;
-        this.modelClass = modelClass;
     }
 
     @Override
-    public TDto create(TCreateDto newEntity) {
-        log.info("Creating new entity: {}", newEntity);
+    public TEntity update(TEntity entity) {
+        log.info("Updating entity: {}", entity);
 
-        var entity = mapper.toEntityFromCreateDto(newEntity);
-        var savedEntity = repository.save(entity);
-        return mapper.toDto(savedEntity);
+        if (repository.findById(entity.getId()).isPresent()) {
+            return repository.update(entity);
+        }
+
+        throw new NotFoundException("Entity " + entity + " not found");
     }
 
     @Override
-    public TDto update(TUpdateDto updateEntity) {
-        log.info("Updating entity: {}", updateEntity);
-
-        var entity = mapper.toEntityFromUpdateDto(updateEntity);
-
-        if (findById(entity.getId()).isPresent())
-            return mapper.toDto(repository.update(entity));
-
-        throw new NotFoundException("Entity " +updateEntity + " not found");
-    }
-
-    @Override
-    public Optional<TDto> findById(Long id) {
+    public Optional<TEntity> findById(Long id) {
         log.info("Finding entity by id: {}", id);
 
-        var entity = repository.findById(id);
-
-        return entity.map(mapper::toDto);
+        return repository.findById(id);
     }
 
     @Override
-    public Page<TDto> findAll(Pageable pageable) {
+    public Page<TEntity> findAll(Pageable pageable) {
         log.info("Finding all entities");
 
-        return repository.findAll(pageable).map(mapper::toDto);
+        return repository.findAll(pageable);
     }
 
     @Override
-    public Optional<TDto> softDeleteById(Long id) {
+    public Optional<TEntity> softDeleteById(Long id) {
         log.info("Deleting entity by id: {}", id);
 
-        var entity = findById(id);
-
-        if (entity.isEmpty())
-            return Optional.empty();
-
-        repository.softDeleteById(id);
-        return entity;
+        return repository.softDeleteById(id);
     }
 
     @Override

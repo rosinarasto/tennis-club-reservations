@@ -1,7 +1,8 @@
 package com.tennisclub.reservations.validator;
 
-import com.tennisclub.reservations.dto.CourtDto;
+import com.tennisclub.reservations.model.dto.CourtDto;
 import com.tennisclub.reservations.service.ReservationService;
+import com.tennisclub.reservations.validator.annotation.AvailableDate;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import lombok.extern.slf4j.Slf4j;
@@ -45,6 +46,10 @@ public class AvailableDateValidator implements ConstraintValidator<AvailableDate
             from = (LocalDateTime) PropertyUtils.getProperty(value, fromField);
             to = (LocalDateTime) PropertyUtils.getProperty(value, toField);
         } catch (InvocationTargetException | ClassCastException | IllegalAccessException | NoSuchMethodException ignored) {
+            return false;
+        }
+
+        if (courtDto == null || from == null || to == null || !from.isBefore(to)) {
             return false;
         }
 

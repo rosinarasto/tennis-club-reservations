@@ -1,7 +1,17 @@
 package com.tennisclub.reservations.service;
 
-import com.tennisclub.reservations.dto.SurfaceDto;
-import com.tennisclub.reservations.dto.create.SurfaceCreateDto;
+import com.tennisclub.reservations.model.entity.Surface;
 
-public interface SurfaceService extends CrudService<SurfaceDto, SurfaceCreateDto, SurfaceDto> {
+/**
+ * Defines surface-specific business operations.
+ */
+public interface SurfaceService extends CrudService<Surface> {
+
+    /**
+     * Creates a new court surface.
+     *
+     * @param newSurface surface to create.
+     * @return created surface.
+     */
+    Surface create(Surface newSurface);
 }

@@ -1,6 +1,6 @@
-package com.tennisclub.reservations.dto.create;
+package com.tennisclub.reservations.model.dto.create;
 
-import com.tennisclub.reservations.validator.PhoneNumber;
+import com.tennisclub.reservations.validator.annotation.PhoneNumber;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
