@@ -1,7 +1,7 @@
 package com.tennisclub.reservations.controller;
 
 import com.tennisclub.reservations.model.factory.ReservationFactory;
-import com.tennisclub.reservations.service.UserService;
+import com.tennisclub.reservations.service.ReservationService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -25,17 +25,17 @@ public class UserControllerTest {
     private MockMvc mockMvc;
 
     @MockitoBean
-    private UserService userService;
+    private ReservationService reservationService;
 
     @Test
     public void courtReservationsByPhoneNumber_returnsReservations() throws Exception {
-        var reservationDTOs = List.of(
-                ReservationFactory.createDto(getTime(12, 0), getTime(13, 30)),
-                ReservationFactory.createDto(getTime(14, 0), getTime(15, 50))
+        var reservations = List.of(
+                ReservationFactory.createReservation(getTime(12, 0), getTime(13, 30)),
+                ReservationFactory.createReservation(getTime(14, 0), getTime(15, 50))
         );
 
-        when(userService.findReservations("123456789", false))
-                .thenReturn(reservationDTOs);
+        when(reservationService.findByUserPhoneNumber("123456789", false))
+                .thenReturn(reservations);
 
         mockMvc.perform(get("/api/users/123456789/reservations"))
                 .andExpect(status().isOk())

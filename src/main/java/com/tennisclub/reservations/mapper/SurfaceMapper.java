@@ -6,5 +6,7 @@ import com.tennisclub.reservations.model.entity.Surface;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
-public interface SurfaceMapper extends GenericMapper<Surface, SurfaceDto, SurfaceCreateDto, SurfaceDto> {
+public interface SurfaceMapper extends GenericMapper<Surface, SurfaceDto, SurfaceDto> {
+
+    Surface toEntityFromCreateDto(SurfaceCreateDto dto);
 }

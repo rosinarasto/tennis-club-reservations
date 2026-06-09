@@ -1,12 +1,7 @@
 package com.tennisclub.reservations.service.impl;
 
-import com.tennisclub.reservations.model.dto.CourtDto;
-import com.tennisclub.reservations.model.dto.ReservationDto;
-import com.tennisclub.reservations.model.dto.create.CourtCreateDto;
+import com.tennisclub.reservations.exception.NotFoundException;
 import com.tennisclub.reservations.exception.ResourceAlreadyExistsException;
-import com.tennisclub.reservations.mapper.CourtMapper;
-import com.tennisclub.reservations.mapper.ReservationMapper;
-import com.tennisclub.reservations.model.entity.BaseEntity;
 import com.tennisclub.reservations.model.entity.Court;
 import com.tennisclub.reservations.repository.CourtRepository;
 import com.tennisclub.reservations.service.CourtService;
@@ -15,56 +10,37 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
-import java.util.Collections;
-import java.util.List;
-
 @Service
 @Slf4j
 @Transactional
-public class CourtServiceImpl extends GenericCrudService<Court, CourtDto, CourtCreateDto, CourtDto> implements CourtService {
+public class CourtServiceImpl extends GenericCrudService<Court> implements CourtService {
 
     private final CourtRepository courtRepository;
 
-    private final ReservationMapper reservationMapper;
-    private final CourtMapper courtMapper;
-
     @Autowired
-    public CourtServiceImpl(CourtRepository repository, CourtMapper courtMapper, ReservationMapper reservationMapper) {
-        super(repository, courtMapper, CourtDto.class, Court.class);
+    public CourtServiceImpl(CourtRepository repository) {
+        super(repository);
         this.courtRepository = repository;
-        this.courtMapper = courtMapper;
-        this.reservationMapper = reservationMapper;
     }
 
     @Override
-    public CourtDto create(CourtCreateDto newEntity) {
-        log.info("Creating new court: {}", newEntity);
+    public Court create(Court newCourt) {
+        log.info("Creating new court: {}", newCourt);
 
-        var court = courtRepository.findByCourtNumber(newEntity.getNumber());
+        var court = courtRepository.findByCourtNumber(newCourt.getNumber());
 
         if (court.isPresent()) {
             throw new ResourceAlreadyExistsException("Court with number already exists");
         }
 
-        var entity = courtMapper.toEntityFromCreateDto(newEntity);
-        var savedEntity = courtRepository.save(entity);
-        return courtMapper.toDto(savedEntity);
+        return courtRepository.save(newCourt);
     }
 
     @Override
-    public List<ReservationDto> findReservations(int number) {
-        log.info("Finding reservations of court: {}", number);
+    public Court findByNumber(int number) {
+        log.info("Finding court with number {}", number);
 
-        var court = courtRepository.findByCourtNumber(number);
-
-        return court.map(value ->
-                        value.getReservations().stream()
-                            .sorted(Comparator.comparing(
-                                    BaseEntity::getCreationDate,
-                                    Comparator.nullsLast(Comparator.naturalOrder())))
-                            .map(reservationMapper::toDto)
-                            .toList())
-                    .orElse(Collections.emptyList());
+        return courtRepository.findByCourtNumber(number)
+                .orElseThrow(() -> new NotFoundException("Court with number " + number + " not found"));
     }
 }

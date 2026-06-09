@@ -6,5 +6,7 @@ import com.tennisclub.reservations.model.entity.Court;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
-public interface CourtMapper extends GenericMapper<Court, CourtDto, CourtCreateDto, CourtDto> {
+public interface CourtMapper extends GenericMapper<Court, CourtDto, CourtDto> {
+
+    Court toEntityFromCreateDto(CourtCreateDto dto);
 }

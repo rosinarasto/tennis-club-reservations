@@ -1,8 +1,11 @@
 package com.tennisclub.reservations.controller;
 
+import com.tennisclub.reservations.model.entity.Court;
+import com.tennisclub.reservations.model.entity.Reservation;
 import com.tennisclub.reservations.model.factory.CourtFactory;
 import com.tennisclub.reservations.model.factory.ReservationFactory;
 import com.tennisclub.reservations.service.CourtService;
+import com.tennisclub.reservations.service.ReservationService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -35,13 +38,17 @@ public class CourtControllerTest {
     @MockitoBean
     private CourtService courtService;
 
+    @MockitoBean
+    private ReservationService reservationService;
+
     @Test
     public void createCourt_returnsCreatedCourt() throws Exception {
         var createDto = CourtFactory.createCreateDto(4);
-        var courtDto = CourtFactory.createDto(1L, 4);
+        var court = CourtFactory.createCourt(4);
+        court.setId(1L);
 
-        when(courtService.create(createDto))
-                .thenReturn(courtDto);
+        when(courtService.create(any(Court.class)))
+                .thenReturn(court);
 
         mockMvc.perform(post("/api/courts")
                         .content(convertToJson(createDto))
@@ -54,9 +61,11 @@ public class CourtControllerTest {
     @Test
     public void updateCourt_returnsUpdatedCourt() throws Exception {
         var courtDto = CourtFactory.createDto(1L, 4);
+        var court = CourtFactory.createCourt(4);
+        court.setId(1L);
 
-        when(courtService.update(courtDto))
-                .thenReturn(courtDto);
+        when(courtService.update(any(Court.class)))
+                .thenReturn(court);
 
         mockMvc.perform(put("/api/courts")
                         .content(convertToJson(courtDto))
@@ -68,10 +77,11 @@ public class CourtControllerTest {
 
     @Test
     public void deleteCourt_returnsDeletedCourt() throws Exception {
-        var courtDto = CourtFactory.createDto(1L, 4);
+        var court = CourtFactory.createCourt(4);
+        court.setId(1L);
 
         when(courtService.softDeleteById(1L))
-                .thenReturn(Optional.of(courtDto));
+                .thenReturn(Optional.of(court));
 
         mockMvc.perform(delete("/api/courts/1"))
                 .andExpect(status().isOk())
@@ -87,10 +97,11 @@ public class CourtControllerTest {
 
     @Test
     public void findCourtById_returnsCourt() throws Exception {
-        var courtDto = CourtFactory.createDto(1L, 4);
+        var court = CourtFactory.createCourt(4);
+        court.setId(1L);
 
         when(courtService.findById(1L))
-                .thenReturn(Optional.of(courtDto));
+                .thenReturn(Optional.of(court));
 
         mockMvc.perform(get("/api/courts/1"))
                 .andExpect(status().isOk())
@@ -110,9 +121,11 @@ public class CourtControllerTest {
     @Test
     public void findAllCourts_returnsPaginatedCourts() throws Exception {
         var courts = List.of(
-                CourtFactory.createDto(1L, 4),
-                CourtFactory.createDto(2L, 5)
+                CourtFactory.createCourt(4),
+                CourtFactory.createCourt(5)
         );
+        courts.get(0).setId(1L);
+        courts.get(1).setId(2L);
 
         when(courtService.findAll(any(Pageable.class)))
                 .thenReturn(new PageImpl<>(courts));
@@ -126,13 +139,13 @@ public class CourtControllerTest {
 
     @Test
     public void courtReservationsByCourtNumber_returnsReservations() throws Exception {
-        var reservationDTOs = List.of(
-                ReservationFactory.createDto(getTime(12, 0), getTime(13, 30)),
-                ReservationFactory.createDto(getTime(14, 0), getTime(15, 50))
+        var reservations = List.of(
+                ReservationFactory.createReservation(getTime(12, 0), getTime(13, 30)),
+                ReservationFactory.createReservation(getTime(14, 0), getTime(15, 50))
         );
 
-        when(courtService.findReservations(4))
-                .thenReturn(reservationDTOs);
+        when(reservationService.findByCourtNumber(4))
+                .thenReturn(reservations);
 
         mockMvc.perform(get("/api/courts/4/reservations"))
                 .andExpect(status().isOk())

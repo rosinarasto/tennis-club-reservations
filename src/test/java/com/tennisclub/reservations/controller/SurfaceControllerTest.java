@@ -1,6 +1,7 @@
 package com.tennisclub.reservations.controller;
 
 import com.tennisclub.reservations.exception.NotFoundException;
+import com.tennisclub.reservations.model.entity.Surface;
 import com.tennisclub.reservations.model.factory.SurfaceFactory;
 import com.tennisclub.reservations.service.SurfaceService;
 import org.junit.jupiter.api.Test;
@@ -37,10 +38,11 @@ public class SurfaceControllerTest {
     @Test
     public void createSurface_returnsCreatedSurface() throws Exception {
         var createDto = SurfaceFactory.createCreateDto("wet");
-        var surfaceDto = SurfaceFactory.createDto(1L, "wet");
+        var surface = SurfaceFactory.createSurface("wet");
+        surface.setId(1L);
 
-        when(surfaceService.create(createDto))
-                .thenReturn(surfaceDto);
+        when(surfaceService.create(any(Surface.class)))
+                .thenReturn(surface);
 
         mockMvc.perform(post("/api/surfaces")
                         .content(convertToJson(createDto))
@@ -53,9 +55,10 @@ public class SurfaceControllerTest {
     @Test
     public void updateSurface_returnsUpdatedSurface() throws Exception {
         var surfaceDto = SurfaceFactory.createDto(1L, "wet");
-        var updatedSurface = SurfaceFactory.createDto(1L, "clay");
+        var updatedSurface = SurfaceFactory.createSurface("clay");
+        updatedSurface.setId(1L);
 
-        when(surfaceService.update(surfaceDto))
+        when(surfaceService.update(any(Surface.class)))
                 .thenReturn(updatedSurface);
 
         mockMvc.perform(put("/api/surfaces")
@@ -70,7 +73,7 @@ public class SurfaceControllerTest {
     public void updateSurface_throwsNotFoundException() throws Exception {
         var surfaceDto = SurfaceFactory.createDto(999L, "wet");
 
-        when(surfaceService.update(surfaceDto))
+        when(surfaceService.update(any(Surface.class)))
                 .thenThrow(new NotFoundException("Surface with id 999 not found"));
 
         mockMvc.perform(put("/api/surfaces")
@@ -81,10 +84,11 @@ public class SurfaceControllerTest {
 
     @Test
     public void deleteSurface_returnsDeleted() throws Exception {
-        var deleteDto = SurfaceFactory.createDto(1L, "wet");
+        var deleteSurface = SurfaceFactory.createSurface("wet");
+        deleteSurface.setId(1L);
 
         when(surfaceService.softDeleteById(1L))
-                .thenReturn(Optional.of(deleteDto));
+                .thenReturn(Optional.of(deleteSurface));
 
         mockMvc.perform(delete("/api/surfaces/1"))
                 .andExpect(status().isOk())
@@ -100,7 +104,8 @@ public class SurfaceControllerTest {
 
     @Test
     public void findSurfaceById_returnsSurface() throws Exception {
-        var surface  = SurfaceFactory.createDto(1L, "wet");
+        var surface  = SurfaceFactory.createSurface("wet");
+        surface.setId(1L);
 
         when(surfaceService.findById(1L))
                 .thenReturn(Optional.of(surface));
@@ -122,9 +127,11 @@ public class SurfaceControllerTest {
     @Test
     public void findAllSurfaces_returnsPaginatedSurfaces() throws Exception {
         var surfaces = List.of(
-                SurfaceFactory.createDto(1L, "wet"),
-                SurfaceFactory.createDto(2L, "dry")
+                SurfaceFactory.createSurface("wet"),
+                SurfaceFactory.createSurface("dry")
         );
+        surfaces.get(0).setId(1L);
+        surfaces.get(1).setId(2L);
 
         when(surfaceService.findAll(any(Pageable.class)))
                 .thenReturn(new PageImpl<>(surfaces));

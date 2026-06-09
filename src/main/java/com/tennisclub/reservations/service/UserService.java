@@ -1,12 +1,10 @@
 package com.tennisclub.reservations.service;
 
-import com.tennisclub.reservations.model.dto.ReservationDto;
-import com.tennisclub.reservations.model.dto.UserDto;
-import com.tennisclub.reservations.model.dto.create.UserCreateDto;
+import com.tennisclub.reservations.model.entity.User;
 
-import java.util.List;
+public interface UserService extends CrudService<User> {
 
-public interface UserService extends CrudService<UserDto, UserCreateDto, UserDto> {
+    User create(User newUser);
 
-    List<ReservationDto> findReservations(String phoneNumber, boolean future);
+    User getOrCreate(User user);
 }

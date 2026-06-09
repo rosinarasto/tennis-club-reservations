@@ -1,12 +1,10 @@
 package com.tennisclub.reservations.service;
 
-import com.tennisclub.reservations.model.dto.CourtDto;
-import com.tennisclub.reservations.model.dto.ReservationDto;
-import com.tennisclub.reservations.model.dto.create.CourtCreateDto;
+import com.tennisclub.reservations.model.entity.Court;
 
-import java.util.List;
+public interface CourtService extends CrudService<Court> {
 
-public interface CourtService extends CrudService<CourtDto, CourtCreateDto, CourtDto> {
+    Court create(Court newCourt);
 
-    List<ReservationDto> findReservations(int number);
+    Court findByNumber(int number);
 }

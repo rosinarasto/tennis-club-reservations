@@ -1,6 +1,7 @@
 package com.tennisclub.reservations.controller;
 
 import com.tennisclub.reservations.config.ApiUris;
+import com.tennisclub.reservations.mapper.SurfaceMapper;
 import com.tennisclub.reservations.model.dto.SurfaceDto;
 import com.tennisclub.reservations.model.dto.create.SurfaceCreateDto;
 import com.tennisclub.reservations.service.SurfaceService;
@@ -16,20 +17,24 @@ import org.springframework.web.bind.annotation.*;
 public class SurfaceController {
 
     private final SurfaceService surfaceService;
+    private final SurfaceMapper surfaceMapper;
 
     @Autowired
-    public SurfaceController(SurfaceService surfaceService) {
+    public SurfaceController(SurfaceService surfaceService, SurfaceMapper surfaceMapper) {
         this.surfaceService = surfaceService;
+        this.surfaceMapper = surfaceMapper;
     }
 
     @PostMapping
     public ResponseEntity<SurfaceDto> createSurface(@Valid @RequestBody SurfaceCreateDto createDto) {
-        return ResponseEntity.ok(surfaceService.create(createDto));
+        var surface = surfaceMapper.toEntityFromCreateDto(createDto);
+        return ResponseEntity.ok(surfaceMapper.toDto(surfaceService.create(surface)));
     }
 
     @PutMapping
     public ResponseEntity<SurfaceDto> updateSurface(@Valid @RequestBody SurfaceDto updateDto) {
-        return ResponseEntity.ok(surfaceService.update(updateDto));
+        var surface = surfaceMapper.toEntityFromUpdateDto(updateDto);
+        return ResponseEntity.ok(surfaceMapper.toDto(surfaceService.update(surface)));
     }
 
     @DeleteMapping
@@ -41,17 +46,21 @@ public class SurfaceController {
     @DeleteMapping(ApiUris.ID_URI)
     public ResponseEntity<SurfaceDto> deleteSurface(@PathVariable long id) {
         var surface = surfaceService.softDeleteById(id);
-        return surface.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.badRequest().build());
+        return surface.map(surfaceMapper::toDto)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.badRequest().build());
     }
 
     @GetMapping
     public ResponseEntity<Page<SurfaceDto>> getSurfaces(Pageable pageable) {
-        return ResponseEntity.ok(surfaceService.findAll(pageable));
+        return ResponseEntity.ok(surfaceService.findAll(pageable).map(surfaceMapper::toDto));
     }
 
     @GetMapping(ApiUris.ID_URI)
     public ResponseEntity<SurfaceDto> getSurface(@PathVariable long id) {
         var surface = surfaceService.findById(id);
-        return surface.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.badRequest().build());
+        return surface.map(surfaceMapper::toDto)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.badRequest().build());
     }
 }

@@ -1,5 +1,6 @@
 package com.tennisclub.reservations.controller;
 
+import com.tennisclub.reservations.model.entity.Reservation;
 import com.tennisclub.reservations.model.factory.ReservationFactory;
 import com.tennisclub.reservations.service.ReservationService;
 import org.junit.jupiter.api.Test;
@@ -20,6 +21,7 @@ import java.util.Optional;
 import static com.tennisclub.reservations.TestUtils.convertToJson;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -38,12 +40,12 @@ public class ReservationControllerTest {
     @Test
     public void createReservation_returnsPrice() throws Exception {
         var createDto = ReservationFactory.createCreateDto();
-        var reservationDto = ReservationFactory.createDto();
+        var reservation = ReservationFactory.createReservation(getTime(13, 30), getTime(15, 0));
 
-        when(reservationService.create(createDto))
-                .thenReturn(reservationDto);
+        when(reservationService.create(any(Reservation.class)))
+                .thenReturn(reservation);
 
-        when(reservationService.isDateAvailable(reservationDto.getCourt().getNumber(), reservationDto.getFrom(), reservationDto.getTo()))
+        when(reservationService.isDateAvailable(anyInt(), any(LocalDateTime.class), any(LocalDateTime.class)))
                 .thenReturn(true);
 
         var expected = BigDecimal.valueOf(126.0);
@@ -59,9 +61,11 @@ public class ReservationControllerTest {
     public void updateReservation_returnsUpdatedReservation() throws Exception {
         var reservationDto = ReservationFactory.createDto();
         reservationDto.setId(1L);
+        var reservation = ReservationFactory.createReservation(getTime(13, 30), getTime(15, 0));
+        reservation.setId(1L);
 
-        when(reservationService.update(reservationDto))
-                .thenReturn(reservationDto);
+        when(reservationService.update(any(Reservation.class)))
+                .thenReturn(reservation);
 
         mockMvc.perform(put("/api/reservations")
                         .content(convertToJson(reservationDto))
@@ -72,11 +76,11 @@ public class ReservationControllerTest {
 
     @Test
     public void deleteReservation_returnsDeletedReservation() throws Exception {
-        var reservationDto = ReservationFactory.createDto();
-        reservationDto.setId(1L);
+        var reservation = ReservationFactory.createReservation(getTime(13, 30), getTime(15, 0));
+        reservation.setId(1L);
 
         when(reservationService.softDeleteById(1L))
-                .thenReturn(Optional.of(reservationDto));
+                .thenReturn(Optional.of(reservation));
 
         mockMvc.perform(delete("/api/reservations/1"))
                 .andExpect(status().isOk())
@@ -85,11 +89,11 @@ public class ReservationControllerTest {
 
     @Test
     public void findReservationById_returnsReservation() throws Exception {
-        var reservationDto = ReservationFactory.createDto();
-        reservationDto.setId(1L);
+        var reservation = ReservationFactory.createReservation(getTime(13, 30), getTime(15, 0));
+        reservation.setId(1L);
 
         when(reservationService.findById(1L))
-                .thenReturn(Optional.of(reservationDto));
+                .thenReturn(Optional.of(reservation));
 
         mockMvc.perform(get("/api/reservations/1"))
                 .andExpect(status().isOk())
@@ -107,9 +111,9 @@ public class ReservationControllerTest {
 
     @Test
     public void findAllReservations_returnsPaginatedReservations() throws Exception {
-        var first = ReservationFactory.createDto();
+        var first = ReservationFactory.createReservation(getTime(13, 30), getTime(15, 0));
         first.setId(1L);
-        var second = ReservationFactory.createDto();
+        var second = ReservationFactory.createReservation(getTime(15, 30), getTime(17, 0));
         second.setId(2L);
 
         when(reservationService.findAll(any(Pageable.class)))

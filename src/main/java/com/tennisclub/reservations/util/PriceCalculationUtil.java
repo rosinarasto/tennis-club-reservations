@@ -1,14 +1,14 @@
 package com.tennisclub.reservations.util;
 
-import com.tennisclub.reservations.model.dto.ReservationDto;
 import com.tennisclub.reservations.model.GameType;
+import com.tennisclub.reservations.model.entity.Reservation;
 
 import java.math.BigDecimal;
 import java.time.Duration;
 
 public class PriceCalculationUtil {
 
-    public static BigDecimal calculatePrice(ReservationDto reservation) {
+    public static BigDecimal calculatePrice(Reservation reservation) {
         var surfacePrice = reservation.getCourt().getSurface().getMinutePrice();
 
         var duration = Duration.between(reservation.getFrom(), reservation.getTo());

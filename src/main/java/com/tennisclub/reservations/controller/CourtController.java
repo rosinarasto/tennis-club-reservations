@@ -1,10 +1,13 @@
 package com.tennisclub.reservations.controller;
 
 import com.tennisclub.reservations.config.ApiUris;
+import com.tennisclub.reservations.mapper.CourtMapper;
+import com.tennisclub.reservations.mapper.ReservationMapper;
 import com.tennisclub.reservations.model.dto.CourtDto;
 import com.tennisclub.reservations.model.dto.ReservationDto;
 import com.tennisclub.reservations.model.dto.create.CourtCreateDto;
 import com.tennisclub.reservations.service.CourtService;
+import com.tennisclub.reservations.service.ReservationService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -19,20 +22,33 @@ import java.util.List;
 public class CourtController {
 
     private final CourtService courtService;
+    private final ReservationService reservationService;
+    private final CourtMapper courtMapper;
+    private final ReservationMapper reservationMapper;
 
     @Autowired
-    public CourtController(CourtService service) {
-        this.courtService = service;
+    public CourtController(
+            CourtService courtService,
+            ReservationService reservationService,
+            CourtMapper courtMapper,
+            ReservationMapper reservationMapper
+    ) {
+        this.courtService = courtService;
+        this.reservationService = reservationService;
+        this.courtMapper = courtMapper;
+        this.reservationMapper = reservationMapper;
     }
 
     @PostMapping
     public ResponseEntity<CourtDto> createCourt(@Valid @RequestBody CourtCreateDto createDto) {
-        return ResponseEntity.ok(courtService.create(createDto));
+        var court = courtMapper.toEntityFromCreateDto(createDto);
+        return ResponseEntity.ok(courtMapper.toDto(courtService.create(court)));
     }
 
     @PutMapping
     public ResponseEntity<CourtDto> updateCourt(@Valid @RequestBody CourtDto updateDto) {
-        return ResponseEntity.ok(courtService.update(updateDto));
+        var court = courtMapper.toEntityFromUpdateDto(updateDto);
+        return ResponseEntity.ok(courtMapper.toDto(courtService.update(court)));
     }
 
     @DeleteMapping
@@ -44,23 +60,27 @@ public class CourtController {
     @DeleteMapping(ApiUris.ID_URI)
     public ResponseEntity<CourtDto> deleteCourt(@PathVariable long id) {
         var court = courtService.softDeleteById(id);
-        return court.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.badRequest().build());
+        return court.map(courtMapper::toDto)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.badRequest().build());
     }
 
     @GetMapping
     public ResponseEntity<Page<CourtDto>> getCourts(Pageable pageable) {
-        return ResponseEntity.ok(courtService.findAll(pageable));
+        return ResponseEntity.ok(courtService.findAll(pageable).map(courtMapper::toDto));
     }
 
     @GetMapping(ApiUris.ID_URI)
     public ResponseEntity<CourtDto> getCourt(@PathVariable long id) {
         var court = courtService.findById(id);
-        return court.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.badRequest().build());
+        return court.map(courtMapper::toDto)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.badRequest().build());
     }
 
     @GetMapping(ApiUris.COURT_RESERVATIONS_URI)
     public ResponseEntity<List<ReservationDto>> getCourtReservations(@PathVariable int number) {
-        var reservations = courtService.findReservations(number);
-        return ResponseEntity.ok().body(reservations);
+        var reservations = reservationService.findByCourtNumber(number);
+        return ResponseEntity.ok().body(reservations.stream().map(reservationMapper::toDto).toList());
     }
 }

@@ -1,5 +1,6 @@
 package com.tennisclub.reservations.service;
 
+import com.tennisclub.reservations.model.entity.BaseEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -8,45 +9,35 @@ import java.util.Optional;
 /**
  * Represents a service for any entity.
  *
- * @param <TDto> universal dto of the entity.
- * @param <TCreateDto> save dto of the entity
- * @param <TUpdateDto> update dto of the entity
+ * @param <TModel> the type of the entity
  */
-public interface CrudService<TDto, TCreateDto, TUpdateDto> {
-
-    /**
-     * Create given {@code newEntity}.
-     *
-     * @return the created entity with generated id.
-     */
-    TDto create(TCreateDto newEntity);
-
+public interface CrudService<TModel extends BaseEntity> {
 
     /**
      * Update given {@code entity}.
      *
-     * @return optional with updated entity, or empty optional if entity was not found
+     * @return updated entity
      */
-    TDto update(TUpdateDto entity);
+    TModel update(TModel entity);
 
     /**
      * Find entity with given {@code id}.
      *
      * @return optional with found entity, or empty optional if no entity with given {@code id} is found
      */
-    Optional<TDto> findById(Long id);
+    Optional<TModel> findById(Long id);
 
     /**
      * Find all entities.
      */
-    Page<TDto> findAll(Pageable pageable);
+    Page<TModel> findAll(Pageable pageable);
 
     /**
      * Soft delete entity with given {@code id}.
      *
      * @return the deleted entity with id.
      */
-    Optional<TDto> softDeleteById(Long id);
+    Optional<TModel> softDeleteById(Long id);
 
     /**
      * Soft delete all entities.
