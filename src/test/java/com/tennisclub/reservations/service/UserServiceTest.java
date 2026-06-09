@@ -34,22 +34,6 @@ public class UserServiceTest {
     private PasswordEncoder passwordEncoder;
 
     @Test
-    public void createUser_throwsException_nameExists() {
-        var user = UserFactory.createUser("gg");
-        var userDTO = UserFactory.createCreateDto("gg");
-
-        when(userRepository.findByPhoneNumber(user.getPhoneNumber()))
-                .thenReturn(Optional.empty());
-
-        when(userRepository.findByName("gg"))
-                .thenReturn(Optional.of(user));
-
-        assertThatExceptionOfType(ResourceAlreadyExistsException.class)
-                .isThrownBy(() -> userService.create(userDTO))
-                .withMessage("user with given name already exists");
-    }
-
-    @Test
     public void createUser_throwsException_phoneNumberExists() {
         var user = UserFactory.createUser("gg", "123456789");
         var userDTO = UserFactory.createCreateDto("gg", "123456789");
@@ -71,9 +55,6 @@ public class UserServiceTest {
         when(userRepository.findByPhoneNumber("123456789"))
                 .thenReturn(Optional.empty());
 
-        when(userRepository.findByName("gg"))
-                .thenReturn(Optional.empty());
-
         when(userRepository.save(any(User.class)))
                 .thenReturn(user);
 
@@ -83,6 +64,24 @@ public class UserServiceTest {
         assertThat(actual.getPhoneNumber()).isEqualTo("123456789");
         assertThat(actual.getName()).isEqualTo("gg");
         assertThat(actual.getPassword()).isEqualTo(user.getPassword());
+    }
+
+    @Test
+    public void createUser_allowsDuplicateName() {
+        var userDTO = UserFactory.createCreateDto("gg", "987654321");
+        var user = UserFactory.createUser("gg", "987654321");
+        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+
+        when(userRepository.findByPhoneNumber("987654321"))
+                .thenReturn(Optional.empty());
+
+        when(userRepository.save(any(User.class)))
+                .thenReturn(user);
+
+        var actual = userService.create(userDTO);
+
+        assertThat(actual.getPhoneNumber()).isEqualTo("987654321");
+        assertThat(actual.getName()).isEqualTo("gg");
     }
 
     @Test

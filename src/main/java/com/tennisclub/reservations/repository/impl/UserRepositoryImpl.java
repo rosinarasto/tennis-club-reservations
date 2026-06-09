@@ -48,10 +48,9 @@ public class UserRepositoryImpl extends GenericCrudRepository<User> implements U
 
         cq.select(root).where(cb.equal(root.get("name"), name), cb.equal(root.get("deleted"), false));
 
-        try {
-            return Optional.of(em.createQuery(cq).getSingleResult());
-        } catch (NoResultException e) {
-            return Optional.empty();
-        }
+        return em.createQuery(cq)
+                .setMaxResults(1)
+                .getResultStream()
+                .findFirst();
     }
 }

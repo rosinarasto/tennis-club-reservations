@@ -52,12 +52,6 @@ public class UserServiceImpl extends GenericCrudService<User, UserDto, UserCreat
             throw new ResourceAlreadyExistsException("user with given phone number already exists");
         }
 
-        var userByName = userRepository.findByName(newUser.getName());
-
-        if (userByName.isPresent()) {
-            throw new ResourceAlreadyExistsException("user with given name already exists");
-        }
-
         var user = userMapper.toEntityFromCreateDto(newUser);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 

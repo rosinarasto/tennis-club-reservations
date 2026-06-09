@@ -23,8 +23,7 @@ CREATE TABLE IF NOT EXISTS "users"
     `creation_date`     TIMESTAMP NOT NULL,
     `modification_date` TIMESTAMP NOT NULL,
     `deleted`           BOOL NOT NULL,
-    UNIQUE (`phone_number`),
-    UNIQUE (`name`)
+    UNIQUE (`phone_number`)
 );
 
 --changeset admin:init-003
