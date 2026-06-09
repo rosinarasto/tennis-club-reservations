@@ -17,7 +17,4 @@ public class UserDto extends BaseDto {
     @PhoneNumber
     @NotNull
     private String phoneNumber;
-
-    @NotNull
-    private String password;
 }

@@ -17,7 +17,4 @@ public class UserCreateDto {
     @PhoneNumber
     @NotNull
     private String phoneNumber;
-
-    @NotNull
-    private String password;
 }
