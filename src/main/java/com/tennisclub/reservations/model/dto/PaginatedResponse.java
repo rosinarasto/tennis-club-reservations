@@ -16,9 +16,9 @@ public record PaginatedResponse<T>(List<T> content, PageMetadata page) {
     /**
      * Creates a simplified response from a Spring page.
      *
+     * @param <T> content item type.
      * @param page source page.
      * @return simplified paginated response.
-     * @param <T> content item type.
      */
     public static <T> PaginatedResponse<T> from(Page<T> page) {
         return new PaginatedResponse<>(
