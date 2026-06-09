@@ -123,7 +123,14 @@ public class ReservationControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(2)))
                 .andExpect(jsonPath("$.content[0].id").value(1L))
-                .andExpect(jsonPath("$.content[1].id").value(2L));
+                .andExpect(jsonPath("$.content[1].id").value(2L))
+                .andExpect(jsonPath("$.page.number").value(0))
+                .andExpect(jsonPath("$.page.size").value(2))
+                .andExpect(jsonPath("$.page.numberOfElements").value(2))
+                .andExpect(jsonPath("$.page.totalElements").value(2))
+                .andExpect(jsonPath("$.page.totalPages").value(1))
+                .andExpect(jsonPath("$.pageable").doesNotExist())
+                .andExpect(jsonPath("$.sort").doesNotExist());
     }
 
     private LocalDateTime getTime(int hour, int minute) {

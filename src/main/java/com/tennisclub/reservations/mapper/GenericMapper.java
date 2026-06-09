@@ -3,36 +3,36 @@ package com.tennisclub.reservations.mapper;
 import com.tennisclub.reservations.model.entity.BaseEntity;
 
 /**
- * GenericMapper interface for mapping between entities and various types of DTOs.
+ * Defines common mapping operations between entities and DTOs.
  *
- * @param <TEntity> the type of the Entity
- * @param <TDto> the type of the main Data Transfer Object
- * @param <TCreateDto> the type of DTO used for creating a new entity
- * @param <TUpdateDto> the type of DTO used for updating an existing entity
+ * @param <TEntity> the type of the entity.
+ * @param <TDto> the type of the main DTO.
+ * @param <TCreateDto> the type of DTO used for creating a new entity.
+ * @param <TUpdateDto> the type of DTO used for updating an existing entity.
  */
 public interface GenericMapper<TEntity extends BaseEntity, TDto, TCreateDto, TUpdateDto> {
 
     /**
-     * Converts a TCreateDto to an Entity.
+     * Converts a create DTO to an entity.
      *
-     * @param dto the TCreateDto to convert
-     * @return the corresponding Entity
+     * @param dto create DTO to convert.
+     * @return corresponding entity.
      */
     TEntity toEntityFromCreateDto(TCreateDto dto);
 
     /**
-     * Converts a TUpdateDto to an Entity.
+     * Converts an update DTO to an entity.
      *
-     * @param dto the TUpdateDto to convert
-     * @return the corresponding Entity
+     * @param dto update DTO to convert.
+     * @return corresponding entity.
      */
     TEntity toEntityFromUpdateDto(TUpdateDto dto);
 
     /**
-     * Converts an Entity to a TDto.
+     * Converts an entity to a DTO.
      *
-     * @param entity the Entity to convert
-     * @return the corresponding TDto
+     * @param entity entity to convert.
+     * @return corresponding DTO.
      */
     TDto toDto(TEntity entity);
 }

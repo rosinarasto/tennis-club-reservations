@@ -2,12 +2,12 @@ package com.tennisclub.reservations.controller;
 
 import com.tennisclub.reservations.config.ApiUris;
 import com.tennisclub.reservations.mapper.SurfaceMapper;
+import com.tennisclub.reservations.model.dto.PaginatedResponse;
 import com.tennisclub.reservations.model.dto.SurfaceDto;
 import com.tennisclub.reservations.model.dto.create.SurfaceCreateDto;
 import com.tennisclub.reservations.service.SurfaceService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -52,8 +52,9 @@ public class SurfaceController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<SurfaceDto>> getSurfaces(Pageable pageable) {
-        return ResponseEntity.ok(surfaceService.findAll(pageable).map(surfaceMapper::toDto));
+    public ResponseEntity<PaginatedResponse<SurfaceDto>> getSurfaces(Pageable pageable) {
+        var surfaces = surfaceService.findAll(pageable).map(surfaceMapper::toDto);
+        return ResponseEntity.ok(PaginatedResponse.from(surfaces));
     }
 
     @GetMapping(ApiUris.ID_URI)

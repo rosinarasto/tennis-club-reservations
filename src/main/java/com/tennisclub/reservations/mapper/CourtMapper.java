@@ -5,6 +5,9 @@ import com.tennisclub.reservations.model.dto.create.CourtCreateDto;
 import com.tennisclub.reservations.model.entity.Court;
 import org.mapstruct.Mapper;
 
+/**
+ * Maps courts between entity and DTO representations.
+ */
 @Mapper(componentModel = "spring")
 public interface CourtMapper extends GenericMapper<Court, CourtDto, CourtCreateDto, CourtDto> {
 }

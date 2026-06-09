@@ -2,13 +2,13 @@ package com.tennisclub.reservations.controller;
 
 import com.tennisclub.reservations.config.ApiUris;
 import com.tennisclub.reservations.mapper.ReservationMapper;
+import com.tennisclub.reservations.model.dto.PaginatedResponse;
 import com.tennisclub.reservations.model.dto.ReservationDto;
 import com.tennisclub.reservations.model.dto.create.ReservationCreateDto;
 import com.tennisclub.reservations.service.ReservationService;
 import com.tennisclub.reservations.util.PriceCalculationUtil;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -50,8 +50,9 @@ public class ReservationController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<ReservationDto>> getReservations(Pageable pageable) {
-        return ResponseEntity.ok(reservationService.findAll(pageable).map(reservationMapper::toDto));
+    public ResponseEntity<PaginatedResponse<ReservationDto>> getReservations(Pageable pageable) {
+        var reservations = reservationService.findAll(pageable).map(reservationMapper::toDto);
+        return ResponseEntity.ok(PaginatedResponse.from(reservations));
     }
 
     @GetMapping(ApiUris.ID_URI)

@@ -140,6 +140,13 @@ public class SurfaceControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(2)))
                 .andExpect(jsonPath("$.content[0].name").value("wet"))
-                .andExpect(jsonPath("$.content[1].name").value("dry"));
+                .andExpect(jsonPath("$.content[1].name").value("dry"))
+                .andExpect(jsonPath("$.page.number").value(0))
+                .andExpect(jsonPath("$.page.size").value(2))
+                .andExpect(jsonPath("$.page.numberOfElements").value(2))
+                .andExpect(jsonPath("$.page.totalElements").value(2))
+                .andExpect(jsonPath("$.page.totalPages").value(1))
+                .andExpect(jsonPath("$.pageable").doesNotExist())
+                .andExpect(jsonPath("$.sort").doesNotExist());
     }
 }

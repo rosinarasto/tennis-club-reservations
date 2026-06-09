@@ -7,40 +7,48 @@ import org.springframework.data.domain.Pageable;
 import java.util.Optional;
 
 /**
- * Represents a service for any entity.
+ * Defines common service operations for entities that support soft deletion.
  *
- * @param <TEntity> the type of the entity
+ * @param <TEntity> the type of the entity.
  */
 public interface CrudService<TEntity extends BaseEntity> {
 
     /**
-     * Update given {@code entity}.
+     * Updates the given {@code entity}.
      *
-     * @return updated entity
+     * @param entity entity with updated values.
+     * @return updated entity.
      */
     TEntity update(TEntity entity);
 
     /**
-     * Find entity with given {@code id}.
+     * Finds an entity with the given {@code id}.
      *
-     * @return optional with found entity, or empty optional if no entity with given {@code id} is found
+     * @param id entity id.
+     * @return optional with found entity, or empty optional if no entity with given {@code id} is found.
      */
     Optional<TEntity> findById(Long id);
 
     /**
-     * Find all entities.
+     * Finds all non-deleted entities for the requested page.
+     *
+     * @param pageable requested page and sorting.
+     * @return page with found entities.
      */
     Page<TEntity> findAll(Pageable pageable);
 
     /**
-     * Soft delete entity with given {@code id}.
+     * Soft deletes an entity with the given {@code id}.
      *
-     * @return the deleted entity with id.
+     * @param id entity id.
+     * @return optional with deleted entity, or empty optional if no entity with given {@code id} is found.
      */
     Optional<TEntity> softDeleteById(Long id);
 
     /**
-     * Soft delete all entities.
+     * Soft deletes all non-deleted entities from the requested page.
+     *
+     * @param pageable requested page and sorting.
      */
     void softDeleteAll(Pageable pageable);
 }

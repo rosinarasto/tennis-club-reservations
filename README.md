@@ -1,8 +1,220 @@
-# TennisClubReservations
-Build and run
-Download maven and run ```mvn clean install spring-boot:run```
+# Tennis Club Reservations
 
-which runs the whole application and the web server is accessible on ```http://localhost:8080```
+Spring Boot REST API for managing tennis club courts, court surfaces, users and reservations.
 
-# How to activate data initialization
-To trigger data initialization you must change the app configuration in ```/src/main/resources/application.properties```; set the ```data.init.enabled``` to true. You might also set the ```spring.jpa.hibernate.ddl-auto``` to create in order to delete all data before starting the application and initialize the app with new data.
+The application uses an in-memory H2 database, Liquibase migrations and optional startup data initialization.
+
+## Requirements
+
+- Java 17
+- Maven Wrapper included in the project (`./mvnw`)
+
+You do not need to install Maven manually.
+
+## Run The Application
+
+```bash
+./mvnw spring-boot:run
+```
+
+The API runs on:
+
+```text
+http://localhost:8080
+```
+
+## Build And Test
+
+Compile and run tests:
+
+```bash
+./mvnw test
+```
+
+Run full verification, including the JaCoCo coverage check:
+
+```bash
+./mvnw verify
+```
+
+The current coverage threshold is configured in `pom.xml` as 90% instruction coverage.
+
+## Database
+
+The default database is in-memory H2:
+
+```properties
+spring.datasource.url=jdbc:h2:mem:tennis-club;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+```
+
+Schema migrations are handled by Liquibase:
+
+```properties
+spring.liquibase.change-log=classpath:db/changelog/app-changelog.xml
+```
+
+Because the database is in-memory, data is recreated on every application start.
+
+## Data Initialization
+
+Startup data is controlled by:
+
+```properties
+data.init.enabled=true
+```
+
+When enabled, the application creates default court surfaces and courts if they do not already exist:
+
+- surfaces: `Hard`, `Clay`
+- courts: numbers `1` to `4`
+
+To disable startup data, set:
+
+```properties
+data.init.enabled=false
+```
+
+## API
+
+Base path:
+
+```text
+/api
+```
+
+Security is currently configured to permit all requests.
+
+### Surfaces
+
+```text
+GET    /api/surfaces
+GET    /api/surfaces/{id}
+POST   /api/surfaces
+PUT    /api/surfaces
+DELETE /api/surfaces
+DELETE /api/surfaces/{id}
+```
+
+Create surface example:
+
+```bash
+curl -X POST http://localhost:8080/api/surfaces \
+  -H "Content-Type: application/json" \
+  -d '{"minutePrice":0.24,"name":"Hard"}'
+```
+
+### Courts
+
+```text
+GET    /api/courts
+GET    /api/courts/{id}
+GET    /api/courts/{number}/reservations
+POST   /api/courts
+PUT    /api/courts
+DELETE /api/courts
+DELETE /api/courts/{id}
+```
+
+Create court example:
+
+```bash
+curl -X POST http://localhost:8080/api/courts \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Center Court","number":10,"surface":{"id":1,"minutePrice":0.24,"name":"Hard"}}'
+```
+
+### Reservations
+
+```text
+GET    /api/reservations
+GET    /api/reservations/{id}
+POST   /api/reservations
+PUT    /api/reservations
+DELETE /api/reservations/{id}
+```
+
+Creating a reservation returns the calculated price.
+
+Create reservation example:
+
+```bash
+curl -X POST http://localhost:8080/api/reservations \
+  -H "Content-Type: application/json" \
+  -d '{
+    "from":"2026-07-01T10:00:00",
+    "to":"2026-07-01T11:00:00",
+    "gameType":"SINGLES",
+    "user":{
+      "name":"John Doe",
+      "phoneNumber":"+421901234567",
+      "password":"secret"
+    },
+    "court":{
+      "id":1,
+      "name":"Emerald Bay Tennis Center",
+      "number":1,
+      "surface":{
+        "id":1,
+        "minutePrice":0.24,
+        "name":"Hard"
+      }
+    }
+  }'
+```
+
+Supported game types:
+
+```text
+SINGLES
+DOUBLES
+```
+
+### Users
+
+There are no public CRUD endpoints for users. Users are created as part of reservation creation when the phone number does not already exist.
+
+```text
+GET /api/users/{phoneNumber}/reservations
+GET /api/users/{phoneNumber}/reservations?future=true
+```
+
+## Pagination
+
+List endpoints support Spring pageable query parameters:
+
+```text
+GET /api/courts?page=0&size=10
+GET /api/reservations?page=0&size=10&sort=creationDate,desc
+```
+
+Paginated responses use a simplified shape:
+
+```json
+{
+  "content": [],
+  "page": {
+    "number": 0,
+    "size": 10,
+    "numberOfElements": 0,
+    "totalElements": 0,
+    "totalPages": 0
+  }
+}
+```
+
+## Project Structure
+
+```text
+src/main/java/com/tennisclub/reservations
++-- config
++-- controller
++-- exception
++-- mapper
++-- model
+|   +-- dto
+|   +-- entity
++-- repository
++-- service
++-- util
++-- validator
+```

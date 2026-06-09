@@ -4,13 +4,13 @@ import com.tennisclub.reservations.config.ApiUris;
 import com.tennisclub.reservations.mapper.CourtMapper;
 import com.tennisclub.reservations.mapper.ReservationMapper;
 import com.tennisclub.reservations.model.dto.CourtDto;
+import com.tennisclub.reservations.model.dto.PaginatedResponse;
 import com.tennisclub.reservations.model.dto.ReservationDto;
 import com.tennisclub.reservations.model.dto.create.CourtCreateDto;
 import com.tennisclub.reservations.service.CourtService;
 import com.tennisclub.reservations.service.ReservationService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -66,8 +66,9 @@ public class CourtController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<CourtDto>> getCourts(Pageable pageable) {
-        return ResponseEntity.ok(courtService.findAll(pageable).map(courtMapper::toDto));
+    public ResponseEntity<PaginatedResponse<CourtDto>> getCourts(Pageable pageable) {
+        var courts = courtService.findAll(pageable).map(courtMapper::toDto);
+        return ResponseEntity.ok(PaginatedResponse.from(courts));
     }
 
     @GetMapping(ApiUris.ID_URI)
