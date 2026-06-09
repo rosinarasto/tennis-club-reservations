@@ -12,8 +12,6 @@ public class CourtFactory {
 
     private static final String DEFAULT_NAME = "court";
 
-    private static final SurfaceDto DEFAULT_SURFACE_DTO = SurfaceFactory.createDto();
-
     public static Court createCourt(int number) {
         return new Court(DEFAULT_NAME, number, null, SurfaceFactory.createSurface());
     }
@@ -23,16 +21,16 @@ public class CourtFactory {
     }
 
     public static CourtDto createDto(Long id, int number) {
-        var dto = new CourtDto(DEFAULT_NAME, number, DEFAULT_SURFACE_DTO);
+        var dto = new CourtDto(DEFAULT_NAME, number, SurfaceFactory.createDto());
         dto.setId(id);
         return dto;
     }
 
     public static CourtDto createDto(int number) {
-        return new CourtDto(DEFAULT_NAME, number, DEFAULT_SURFACE_DTO);
+        return new CourtDto(DEFAULT_NAME, number, SurfaceFactory.createDto());
     }
 
     public static CourtCreateDto createCreateDto(int number) {
-        return new CourtCreateDto(DEFAULT_NAME, number, DEFAULT_SURFACE_DTO);
+        return new CourtCreateDto(DEFAULT_NAME, number, SurfaceFactory.createDto());
     }
 }

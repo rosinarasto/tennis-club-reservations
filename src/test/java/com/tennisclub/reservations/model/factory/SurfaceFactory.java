@@ -19,10 +19,6 @@ public class SurfaceFactory {
         return new Surface(DEFAULT_MINUTE_PRICE, DEFAULT_NAME, null);
     }
 
-    public static SurfaceDto createDto(BigDecimal price) {
-        return new SurfaceDto(price, DEFAULT_NAME);
-    }
-
     public static SurfaceCreateDto createCreateDto(String name) {
         return new SurfaceCreateDto(DEFAULT_MINUTE_PRICE, name);
     }

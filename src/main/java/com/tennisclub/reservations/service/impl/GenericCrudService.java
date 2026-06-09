@@ -13,19 +13,19 @@ import java.util.Optional;
 
 @Slf4j
 @Transactional
-public abstract class GenericCrudService<TModel extends BaseEntity> implements CrudService<TModel> {
+public abstract class GenericCrudService<TEntity extends BaseEntity> implements CrudService<TEntity> {
 
-    private final CrudRepository<TModel> repository;
+    private final CrudRepository<TEntity> repository;
 
-    protected GenericCrudService(CrudRepository<TModel> repository) {
+    protected GenericCrudService(CrudRepository<TEntity> repository) {
         this.repository = repository;
     }
 
     @Override
-    public TModel update(TModel entity) {
+    public TEntity update(TEntity entity) {
         log.info("Updating entity: {}", entity);
 
-        if (findById(entity.getId()).isPresent()) {
+        if (repository.findById(entity.getId()).isPresent()) {
             return repository.update(entity);
         }
 
@@ -33,21 +33,21 @@ public abstract class GenericCrudService<TModel extends BaseEntity> implements C
     }
 
     @Override
-    public Optional<TModel> findById(Long id) {
+    public Optional<TEntity> findById(Long id) {
         log.info("Finding entity by id: {}", id);
 
         return repository.findById(id);
     }
 
     @Override
-    public Page<TModel> findAll(Pageable pageable) {
+    public Page<TEntity> findAll(Pageable pageable) {
         log.info("Finding all entities");
 
         return repository.findAll(pageable);
     }
 
     @Override
-    public Optional<TModel> softDeleteById(Long id) {
+    public Optional<TEntity> softDeleteById(Long id) {
         log.info("Deleting entity by id: {}", id);
 
         return repository.softDeleteById(id);

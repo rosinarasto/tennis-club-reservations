@@ -9,16 +9,16 @@ import java.util.Optional;
 /**
  * Represents a repository for any entity.
  *
- * @param <T> the type of the entity.
+ * @param <TEntity> the type of the entity.
  */
-public interface CrudRepository<T extends BaseEntity> {
+public interface CrudRepository<TEntity extends BaseEntity> {
 
     /**
      * Persist given {@code newEntity}.
      *
      * @return the persisted entity with generated id.
      */
-    T save(T newEntity);
+    TEntity save(TEntity newEntity);
 
 
     /**
@@ -26,24 +26,24 @@ public interface CrudRepository<T extends BaseEntity> {
      *
      * @return the updated entity.
      */
-    T update(T entity);
+    TEntity update(TEntity entity);
 
     /**
      * Find entity with given {@code id}.
      *
      * @return optional with found entity, or empty optional if no entity with given {@code id} is found
      */
-    Optional<T> findById(Long id);
+    Optional<TEntity> findById(Long id);
 
     /**
      * Find all entities for pageable.
      */
-    Page<T> findAll(Pageable pageable);
+    Page<TEntity> findAll(Pageable pageable);
 
     /**
      * Soft delete entity with given {@code id}.
      */
-    Optional<T> softDeleteById(Long id);
+    Optional<TEntity> softDeleteById(Long id);
 
     /**
      * Soft delete all entities from pageable.

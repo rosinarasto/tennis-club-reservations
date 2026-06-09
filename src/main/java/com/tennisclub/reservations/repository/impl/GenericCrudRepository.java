@@ -5,6 +5,7 @@ import com.tennisclub.reservations.repository.CrudRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
@@ -20,20 +21,20 @@ import java.util.Optional;
 
 @NoRepositoryBean
 @Slf4j
-public abstract class GenericCrudRepository<T extends BaseEntity> implements CrudRepository<T> {
+public abstract class GenericCrudRepository<TEntity extends BaseEntity> implements CrudRepository<TEntity> {
 
-    private final Class<T> type;
+    private final Class<TEntity> type;
 
     @PersistenceContext
     private EntityManager entityManager;
 
-    public GenericCrudRepository(Class<T> type) {
+    public GenericCrudRepository(Class<TEntity> type) {
         this.type = type;
     }
 
     @Override
     @Transactional
-    public T save(T newEntity) {
+    public TEntity save(TEntity newEntity) {
         log.info("saving entity {}", newEntity);
 
         if (newEntity.getId() == null) {
@@ -46,14 +47,14 @@ public abstract class GenericCrudRepository<T extends BaseEntity> implements Cru
 
     @Override
     @Transactional
-    public T update(T entity) {
+    public TEntity update(TEntity entity) {
         log.info("updating entity {}", entity);
 
         return entityManager.merge(entity);
     }
 
     @Override
-    public Optional<T> findById(Long id) {
+    public Optional<TEntity> findById(Long id) {
         log.info("finding entity with id {}", id);
 
         var cb = entityManager.getCriteriaBuilder();
@@ -73,20 +74,18 @@ public abstract class GenericCrudRepository<T extends BaseEntity> implements Cru
     }
 
     @Override
-    public Page<T> findAll(Pageable pageable) {
+    public Page<TEntity> findAll(Pageable pageable) {
         log.info("finding all entities for pageable");
 
-        var q = entityManager.createQuery(getNotDeleted());
+        var query = entityManager.createQuery(getNotDeletedQuery());
+        applyPagination(query, pageable);
 
-        q.setFirstResult(pageable.getPageNumber() * pageable.getPageSize());
-        q.setMaxResults(pageable.getPageSize());
-
-        return new PageImpl<>(q.getResultList(), pageable, countNotDeleted());
+        return new PageImpl<>(query.getResultList(), pageable, countNotDeleted());
     }
 
     @Override
     @Transactional
-    public Optional<T> softDeleteById(Long id) {
+    public Optional<TEntity> softDeleteById(Long id) {
         log.info("deleting entity with id {}", id);
 
         var entity = findById(id);
@@ -98,26 +97,23 @@ public abstract class GenericCrudRepository<T extends BaseEntity> implements Cru
         return entity;
     }
 
-
     @Override
     @Transactional
     public void softDeleteAll(Pageable pageable) {
         log.info("deleting all entities for pageable");
 
-        var q = entityManager.createQuery(getNotDeleted());
-        q.setFirstResult(pageable.getPageNumber() * pageable.getPageSize());
-        q.setMaxResults(pageable.getPageSize());
+        var query = entityManager.createQuery(getNotDeletedQuery());
+        applyPagination(query, pageable);
 
-        var entities = q.getResultList();
+        var entities = query.getResultList();
 
         for (var entity : entities) {
             entity.softDelete();
             save(entity);
         }
-
     }
 
-    private CriteriaQuery<T> getNotDeleted() {
+    private CriteriaQuery<TEntity> getNotDeletedQuery() {
         var cb = entityManager.getCriteriaBuilder();
         var cq = cb.createQuery(type);
         var root = cq.from(type);
@@ -136,7 +132,12 @@ public abstract class GenericCrudRepository<T extends BaseEntity> implements Cru
         return entityManager.createQuery(cq).getSingleResult();
     }
 
-    private Predicate isNotDeleted(CriteriaBuilder cb, Root<T> root) {
+    private Predicate isNotDeleted(CriteriaBuilder cb, Root<TEntity> root) {
         return cb.equal(root.get(BaseEntity.FIELD_DELETED), false);
+    }
+
+    private void applyPagination(TypedQuery<TEntity> query, Pageable pageable) {
+        query.setFirstResult((int) pageable.getOffset());
+        query.setMaxResults(pageable.getPageSize());
     }
 }
