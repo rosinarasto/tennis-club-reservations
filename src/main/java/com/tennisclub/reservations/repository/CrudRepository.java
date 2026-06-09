@@ -43,7 +43,7 @@ public interface CrudRepository<T extends BaseEntity> {
     /**
      * Soft delete entity with given {@code id}.
      */
-    void softDeleteById(Long id);
+    Optional<T> softDeleteById(Long id);
 
     /**
      * Soft delete all entities from pageable.

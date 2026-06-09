@@ -1,5 +1,6 @@
 package com.tennisclub.reservations.repository.impl;
 
+import com.tennisclub.reservations.model.entity.BaseEntity;
 import com.tennisclub.reservations.model.entity.User;
 import com.tennisclub.reservations.repository.UserRepository;
 import jakarta.persistence.EntityManager;
@@ -29,28 +30,15 @@ public class UserRepositoryImpl extends GenericCrudRepository<User> implements U
         var cq = cb.createQuery(User.class);
         var root = cq.from(User.class);
 
-        cq.select(root).where(cb.equal(root.get("phoneNumber"), phoneNumber), cb.equal(root.get("deleted"), false));
+        cq.select(root).where(
+                cb.equal(root.get(User.FIELD_PHONE_NUMBER), phoneNumber),
+                cb.equal(root.get(BaseEntity.FIELD_DELETED), false)
+        );
 
         try {
             return Optional.of(em.createQuery(cq).getSingleResult());
         } catch (NoResultException e) {
             return Optional.empty();
         }
-    }
-
-    @Override
-    public Optional<User> findByName(String name) {
-        log.info("find user by name");
-
-        var cb = em.getCriteriaBuilder();
-        var cq = cb.createQuery(User.class);
-        var root = cq.from(User.class);
-
-        cq.select(root).where(cb.equal(root.get("name"), name), cb.equal(root.get("deleted"), false));
-
-        return em.createQuery(cq)
-                .setMaxResults(1)
-                .getResultStream()
-                .findFirst();
     }
 }

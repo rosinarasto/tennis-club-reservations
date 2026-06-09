@@ -15,13 +15,15 @@ import java.util.List;
 @AllArgsConstructor
 public class Court extends BaseEntity {
 
+    public static final String FIELD_NUMBER = "number";
+
     private String name;
 
     @Column(unique = true, nullable = false)
     private int number;
 
     @OneToMany(mappedBy = "court")
-    @OrderBy("creationDate")
+    @OrderBy(BaseEntity.FIELD_CREATION_DATE)
     private List<Reservation> reservations = new ArrayList<>();
 
     @ManyToOne

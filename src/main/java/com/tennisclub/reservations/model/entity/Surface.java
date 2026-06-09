@@ -19,6 +19,8 @@ import java.util.List;
 @AllArgsConstructor
 public class Surface extends BaseEntity {
 
+    public static final String FIELD_NAME = "name";
+
     @Column(name = "minute_price")
     private BigDecimal minutePrice;
 

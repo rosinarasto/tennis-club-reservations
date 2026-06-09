@@ -39,19 +39,4 @@ public class UserRepositoryTest {
         assertThat(actual).contains(user);
     }
 
-    @Test
-    public void findByName_returnsEmpty() {
-        var actual = userRepository.findByName("jj");
-        assertThat(actual).isEmpty();
-    }
-
-    @Test
-    public void findByName_returnsUser() {
-        var user = UserFactory.createUser("jj");
-        em.persist(user);
-
-        var actual = userRepository.findByName("jj");
-
-        assertThat(actual).contains(user);
-    }
 }

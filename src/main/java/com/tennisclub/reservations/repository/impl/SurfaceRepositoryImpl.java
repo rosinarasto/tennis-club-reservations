@@ -1,5 +1,6 @@
 package com.tennisclub.reservations.repository.impl;
 
+import com.tennisclub.reservations.model.entity.BaseEntity;
 import com.tennisclub.reservations.model.entity.Surface;
 import com.tennisclub.reservations.repository.SurfaceRepository;
 import jakarta.persistence.EntityManager;
@@ -29,7 +30,10 @@ public class SurfaceRepositoryImpl extends GenericCrudRepository<Surface> implem
         var cq = cb.createQuery(Surface.class);
         var root = cq.from(Surface.class);
 
-        cq.select(root).where(cb.equal(root.get("name"), name), cb.equal(root.get("deleted"), false));
+        cq.select(root).where(
+                cb.equal(root.get(Surface.FIELD_NAME), name),
+                cb.equal(root.get(BaseEntity.FIELD_DELETED), false)
+        );
 
         try {
             return Optional.of(em.createQuery(cq).getSingleResult());

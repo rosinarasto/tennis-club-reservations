@@ -1,6 +1,7 @@
 package com.tennisclub.reservations.repository.impl;
 
 import com.tennisclub.reservations.model.entity.Court;
+import com.tennisclub.reservations.model.entity.BaseEntity;
 import com.tennisclub.reservations.repository.CourtRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
@@ -29,7 +30,10 @@ public class CourtRepositoryImpl extends GenericCrudRepository<Court> implements
         var cq = cb.createQuery(Court.class);
         var root = cq.from(Court.class);
 
-        cq.select(root).where(cb.equal(root.get("number"), number), cb.equal(root.get("deleted"), false));
+        cq.select(root).where(
+                cb.equal(root.get(Court.FIELD_NUMBER), number),
+                cb.equal(root.get(BaseEntity.FIELD_DELETED), false)
+        );
 
         try {
             return Optional.of(em.createQuery(cq).getSingleResult());

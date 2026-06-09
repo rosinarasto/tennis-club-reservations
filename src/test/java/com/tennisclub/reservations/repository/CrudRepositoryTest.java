@@ -78,6 +78,17 @@ public class CrudRepositoryTest {
     }
 
     @Test
+    public void findAll_returnsTotalElementsForAllPages() {
+        em.persist(SurfaceFactory.createSurface("grass"));
+        em.persist(SurfaceFactory.createSurface("clay"));
+
+        var actual = repository.findAll(PageRequest.of(1, 1));
+
+        assertThat(actual.getTotalElements()).isEqualTo(2);
+        assertThat(actual.getContent().size()).isEqualTo(1);
+    }
+
+    @Test
     public void softDeleteById() {
         var surface = repository.save(SurfaceFactory.createSurface("grass"));
         repository.softDeleteById(surface.getId());

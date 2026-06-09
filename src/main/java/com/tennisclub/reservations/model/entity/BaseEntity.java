@@ -12,6 +12,10 @@ import java.time.LocalDateTime;
 @ToString
 public abstract class BaseEntity {
 
+    public static final String FIELD_ID = "id";
+    public static final String FIELD_CREATION_DATE = "creationDate";
+    public static final String FIELD_DELETED = "deleted";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

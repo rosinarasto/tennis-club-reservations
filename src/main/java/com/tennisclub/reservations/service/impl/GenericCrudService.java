@@ -50,13 +50,7 @@ public abstract class GenericCrudService<TModel extends BaseEntity> implements C
     public Optional<TModel> softDeleteById(Long id) {
         log.info("Deleting entity by id: {}", id);
 
-        var entity = findById(id);
-
-        if (entity.isEmpty())
-            return Optional.empty();
-
-        repository.softDeleteById(id);
-        return entity;
+        return repository.softDeleteById(id);
     }
 
     @Override

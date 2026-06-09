@@ -16,6 +16,8 @@ import java.util.List;
 @AllArgsConstructor
 public class User extends BaseEntity {
 
+    public static final String FIELD_PHONE_NUMBER = "phoneNumber";
+
     @Column(nullable = false)
     private String name;
 
@@ -25,6 +27,6 @@ public class User extends BaseEntity {
     private String password;
 
     @OneToMany(mappedBy = "user")
-    @OrderBy("from")
+    @OrderBy(Reservation.FIELD_FROM)
     private List<Reservation> reservations = new ArrayList<>();
 }

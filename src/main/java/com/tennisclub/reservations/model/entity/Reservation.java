@@ -15,6 +15,11 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class Reservation extends BaseEntity {
 
+    public static final String FIELD_FROM = "from";
+    public static final String FIELD_TO = "to";
+    public static final String FIELD_USER = "user";
+    public static final String FIELD_COURT = "court";
+
     @Column(name = "from_date")
     private LocalDateTime from;
 
