@@ -13,6 +13,9 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+/**
+ * Request DTO for updating a reservation.
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

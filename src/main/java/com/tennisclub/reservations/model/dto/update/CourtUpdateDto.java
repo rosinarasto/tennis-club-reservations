@@ -7,6 +7,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Request DTO for updating a court.
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

@@ -22,6 +22,13 @@ public class JwtDecoderFactory {
         this.jwtSecretKeyFactory = jwtSecretKeyFactory;
     }
 
+    /**
+     * Creates a decoder that validates token signature, expiration and expected token type.
+     *
+     * @param secret shared signing secret.
+     * @param expectedTokenType expected value of the token-type claim.
+     * @return configured JWT decoder.
+     */
     public JwtDecoder create(String secret, String expectedTokenType) {
         var decoder = NimbusJwtDecoder.withSecretKey(jwtSecretKeyFactory.create(secret))
                 .macAlgorithm(MacAlgorithm.HS256)

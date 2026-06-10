@@ -44,14 +44,32 @@ public class JwtService {
         this.refreshTokenExpiration = refreshTokenExpiration;
     }
 
+    /**
+     * Creates an access token for authenticated API requests.
+     *
+     * @param userDetails authenticated user details.
+     * @return signed access token.
+     */
     public String createAccessToken(UserDetails userDetails) {
         return createToken(userDetails, ACCESS_TOKEN_TYPE, accessTokenExpiration);
     }
 
+    /**
+     * Creates a refresh token for obtaining a new token pair.
+     *
+     * @param userDetails authenticated user details.
+     * @return signed refresh token.
+     */
     public String createRefreshToken(UserDetails userDetails) {
         return createToken(userDetails, REFRESH_TOKEN_TYPE, refreshTokenExpiration);
     }
 
+    /**
+     * Validates a refresh token and returns its subject.
+     *
+     * @param token refresh token.
+     * @return token subject.
+     */
     public String getSubjectFromRefreshToken(String token) {
         var jwt = refreshTokenDecoder.decode(token);
 

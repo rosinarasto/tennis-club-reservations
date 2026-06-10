@@ -13,6 +13,9 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.function.Supplier;
 
+/**
+ * Authorizes method invocations annotated with {@link RequiredRoles}.
+ */
 public class RequiredRolesAuthorizationManager implements AuthorizationManager<MethodInvocation> {
 
     @Override

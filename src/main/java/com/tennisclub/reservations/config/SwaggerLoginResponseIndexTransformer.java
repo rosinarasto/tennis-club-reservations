@@ -13,6 +13,9 @@ import org.springframework.web.servlet.resource.TransformedResource;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * Adds Swagger UI behavior that automatically authorizes the access token returned by the login endpoint.
+ */
 public class SwaggerLoginResponseIndexTransformer extends SwaggerIndexPageTransformer {
 
     private static final String SWAGGER_INITIALIZER = "swagger-initializer.js";

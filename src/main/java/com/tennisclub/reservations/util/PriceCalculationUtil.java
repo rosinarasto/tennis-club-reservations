@@ -6,8 +6,17 @@ import com.tennisclub.reservations.model.entity.Reservation;
 import java.math.BigDecimal;
 import java.time.Duration;
 
+/**
+ * Calculates reservation prices from court surface price, duration and game type.
+ */
 public class PriceCalculationUtil {
 
+    /**
+     * Calculates the total price for the given reservation.
+     *
+     * @param reservation reservation to price.
+     * @return calculated price.
+     */
     public static BigDecimal calculatePrice(Reservation reservation) {
         var surfacePrice = reservation.getCourt().getSurface().getMinutePrice();
 
