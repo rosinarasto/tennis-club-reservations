@@ -4,6 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Represents issued access and refresh JWT tokens.
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

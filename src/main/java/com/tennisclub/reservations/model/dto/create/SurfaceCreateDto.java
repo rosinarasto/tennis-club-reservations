@@ -7,6 +7,9 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
+/**
+ * Request DTO for creating a court surface.
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

@@ -166,6 +166,8 @@ security.jwt.access-token-expiration=PT15M
 security.jwt.refresh-token-expiration=P7D
 ```
 
+For secured endpoint examples, replace `<access-token>` with the token returned by `/api/auth/login`.
+
 ### Surfaces
 
 ```text
@@ -181,6 +183,7 @@ Create surface example:
 
 ```bash
 curl -X POST http://localhost:8080/api/surfaces \
+  -H "Authorization: Bearer <access-token>" \
   -H "Content-Type: application/json" \
   -d '{"minutePrice":0.24,"name":"Hard"}'
 ```
@@ -201,6 +204,7 @@ Create court example:
 
 ```bash
 curl -X POST http://localhost:8080/api/courts \
+  -H "Authorization: Bearer <access-token>" \
   -H "Content-Type: application/json" \
   -d '{"name":"Center Court","number":10,"surfaceId":1}'
 ```
@@ -215,12 +219,20 @@ PUT    /api/reservations
 DELETE /api/reservations/{id}
 ```
 
-Creating a reservation returns the calculated price.
+Creating a reservation returns the created reservation id and calculated price:
+
+```json
+{
+  "reservationId": 1,
+  "price": 14.40
+}
+```
 
 Create reservation example:
 
 ```bash
 curl -X POST http://localhost:8080/api/reservations \
+  -H "Authorization: Bearer <access-token>" \
   -H "Content-Type: application/json" \
   -d '{
     "from":"2026-07-01T10:00:00",
@@ -278,15 +290,41 @@ Paginated responses use a simplified shape:
 
 ```text
 src/main/java/com/tennisclub/reservations
++-- auth
+|   +-- dto
 +-- config
 +-- controller
 +-- exception
 +-- mapper
 +-- model
 |   +-- dto
+|   |   +-- create
+|   |   +-- update
 |   +-- entity
 +-- repository
+|   +-- impl
++-- security
+|   +-- annotation
 +-- service
+|   +-- impl
 +-- util
 +-- validator
+|   +-- annotation
 ```
+
+Other relevant files:
+
+```text
+src/main/resources
++-- application.properties
++-- db/changelog
+    +-- app-changelog.xml
+    +-- init.sql
+
+class_diagram.puml
+use_case_diagram.puml
+```
+
+## License
+
+This project is licensed under the MIT License. See [LICENSE](LICENSE).
