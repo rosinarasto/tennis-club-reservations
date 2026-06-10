@@ -28,6 +28,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(properties = {
@@ -61,6 +63,32 @@ public class JwtSecurityTest {
         mockMvc.perform(get("/api/surfaces")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer invalid-token"))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    public void openApiDocs_returnOkWhenTokenIsMissing() throws Exception {
+        mockMvc.perform(get("/v3/api-docs"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void openApiDocs_markSecuredEndpointsWithBearerAuth() throws Exception {
+        mockMvc.perform(get("/v3/api-docs"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.components.securitySchemes.bearerAuth.type").value("http"))
+                .andExpect(jsonPath("$.components.securitySchemes.bearerAuth.scheme").value("bearer"))
+                .andExpect(jsonPath("$.paths['/api/courts/{id}'].get.security[0].bearerAuth").isArray())
+                .andExpect(jsonPath("$.paths['/api/auth/login'].post.security").doesNotExist());
+    }
+
+    @Test
+    public void swaggerUi_autoAuthorizesAccessTokenFromLoginResponse() throws Exception {
+        mockMvc.perform(get("/swagger-ui/swagger-initializer.js"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("responseInterceptor")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("url.pathname === '/api/auth/login'")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("window.ui.authActions.authorize")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("bearerAuth")));
     }
 
     @Test

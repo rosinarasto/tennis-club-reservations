@@ -23,6 +23,20 @@ The API runs on:
 http://localhost:8080
 ```
 
+Swagger UI is available at:
+
+```text
+http://localhost:8080/swagger-ui.html
+```
+
+After a successful Swagger login request, the returned access token is automatically used as the Bearer token for secured endpoints.
+
+The OpenAPI JSON specification is available at:
+
+```text
+http://localhost:8080/v3/api-docs
+```
+
 ## Build And Test
 
 Compile and run tests:
