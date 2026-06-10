@@ -1,7 +1,7 @@
-package com.tennisclub.reservations.model.dto.create;
+package com.tennisclub.reservations.auth.dto;
 
 import com.tennisclub.reservations.validator.annotation.PhoneNumber;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,12 +9,12 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserCreateDto {
-
-    @NotNull
-    private String name;
+public class AuthRequestDto {
 
     @PhoneNumber
-    @NotNull
+    @NotBlank
     private String phoneNumber;
+
+    @NotBlank
+    private String password;
 }

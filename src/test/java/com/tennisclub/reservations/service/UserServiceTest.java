@@ -1,7 +1,7 @@
 package com.tennisclub.reservations.service;
 
-import com.tennisclub.reservations.exception.NotFoundException;
 import com.tennisclub.reservations.exception.ResourceAlreadyExistsException;
+import com.tennisclub.reservations.model.Role;
 import com.tennisclub.reservations.model.entity.User;
 import com.tennisclub.reservations.model.factory.UserFactory;
 import com.tennisclub.reservations.repository.UserRepository;
@@ -18,7 +18,10 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOf
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-@SpringBootTest
+@SpringBootTest(properties = {
+        "data.init.enabled=false",
+        "security.default-user-password=default-password"
+})
 public class UserServiceTest {
 
     @MockitoBean
@@ -45,34 +48,31 @@ public class UserServiceTest {
     @Test
     public void createUser() {
         var newUser = UserFactory.createUser("gg", "123456789");
-        var user = UserFactory.createUser("gg", "123456789");
-        user.setPassword(passwordEncoder.encode(newUser.getPassword()));
 
         when(userRepository.findByPhoneNumber("123456789"))
                 .thenReturn(Optional.empty());
 
         when(userRepository.save(any(User.class)))
-                .thenReturn(user);
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         var actual = userService.create(newUser);
 
         assertThat(actual).isNotNull();
         assertThat(actual.getPhoneNumber()).isEqualTo("123456789");
         assertThat(actual.getName()).isEqualTo("gg");
-        assertThat(actual.getPassword()).isEqualTo(user.getPassword());
+        assertThat(actual.getRole()).isEqualTo(Role.USER);
+        assertThat(passwordEncoder.matches("default-password", actual.getPassword())).isTrue();
     }
 
     @Test
     public void createUser_allowsDuplicateName() {
         var newUser = UserFactory.createUser("gg", "987654321");
-        var user = UserFactory.createUser("gg", "987654321");
-        user.setPassword(passwordEncoder.encode(newUser.getPassword()));
 
         when(userRepository.findByPhoneNumber("987654321"))
                 .thenReturn(Optional.empty());
 
         when(userRepository.save(any(User.class)))
-                .thenReturn(user);
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         var actual = userService.create(newUser);
 
@@ -102,18 +102,6 @@ public class UserServiceTest {
                 .thenReturn(user);
 
         assertThat(userService.getOrCreate(newUser)).isEqualTo(user);
-    }
-
-    @Test
-    public void updateUser_throwsException() {
-        var user = UserFactory.createUser();
-        user.setId(1L);
-
-        when(userRepository.findById(1L))
-                .thenReturn(Optional.empty());
-
-        assertThatExceptionOfType(NotFoundException.class)
-                .isThrownBy(() -> userService.update(user));
     }
 
 }

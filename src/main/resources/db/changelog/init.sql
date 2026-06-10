@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS "users"
     `name`              VARCHAR(150) NOT NULL,
     `phone_number`      VARCHAR(150) NOT NULL,
     `password`          VARCHAR(150) NOT NULL,
+    `role`              ENUM('USER', 'ADMIN') NOT NULL,
     `creation_date`     TIMESTAMP NOT NULL,
     `modification_date` TIMESTAMP NOT NULL,
     `deleted`           BOOL NOT NULL,

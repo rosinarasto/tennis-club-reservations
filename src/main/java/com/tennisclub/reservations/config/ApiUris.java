@@ -14,4 +14,8 @@ public abstract class ApiUris {
 
     public static final String USER_URI               = BASE_URI + "/users";
     public static final String USER_RESERVATIONS_URI  = "/{phoneNumber}/reservations";
+
+    public static final String AUTH_URI               = BASE_URI + "/auth";
+    public static final String LOGIN_URI              = "/login";
+    public static final String REFRESH_URI            = "/refresh";
 }

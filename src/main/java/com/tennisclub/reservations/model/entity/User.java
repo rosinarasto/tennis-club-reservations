@@ -1,5 +1,6 @@
 package com.tennisclub.reservations.model.entity;
 
+import com.tennisclub.reservations.model.Role;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -17,6 +18,7 @@ import java.util.List;
 public class User extends BaseEntity {
 
     public static final String FIELD_PHONE_NUMBER = "phoneNumber";
+    public static final String FIELD_ROLE = "role";
 
     @Column(nullable = false)
     private String name;
@@ -25,6 +27,10 @@ public class User extends BaseEntity {
     private String phoneNumber;
 
     private String password;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role = Role.USER;
 
     @OneToMany(mappedBy = "user")
     @OrderBy(Reservation.FIELD_FROM)

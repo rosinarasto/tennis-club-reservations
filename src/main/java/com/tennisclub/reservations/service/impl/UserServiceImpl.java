@@ -1,30 +1,37 @@
 package com.tennisclub.reservations.service.impl;
 
-import com.tennisclub.reservations.exception.NotFoundException;
 import com.tennisclub.reservations.exception.ResourceAlreadyExistsException;
+import com.tennisclub.reservations.model.Role;
 import com.tennisclub.reservations.model.entity.User;
 import com.tennisclub.reservations.repository.UserRepository;
 import com.tennisclub.reservations.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
 @Transactional
-public class UserServiceImpl extends GenericCrudService<User> implements UserService {
+public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
 
     private final PasswordEncoder passwordEncoder;
 
+    private final String defaultUserPassword;
+
     @Autowired
-    public UserServiceImpl(UserRepository repository, PasswordEncoder passwordEncoder) {
-        super(repository);
+    public UserServiceImpl(
+            UserRepository repository,
+            PasswordEncoder passwordEncoder,
+            @Value("${security.default-user-password}") String defaultUserPassword
+    ) {
         this.userRepository = repository;
         this.passwordEncoder = passwordEncoder;
+        this.defaultUserPassword = defaultUserPassword;
     }
 
     @Override
@@ -37,7 +44,8 @@ public class UserServiceImpl extends GenericCrudService<User> implements UserSer
             throw new ResourceAlreadyExistsException("user with given phone number already exists");
         }
 
-        newUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
+        newUser.setRole(Role.USER);
+        newUser.setPassword(passwordEncoder.encode(defaultUserPassword));
 
         return userRepository.save(newUser);
     }
@@ -50,16 +58,4 @@ public class UserServiceImpl extends GenericCrudService<User> implements UserSer
                 .orElseGet(() -> create(user));
     }
 
-    @Override
-    public User update(User updateUser) {
-        log.info("Updating User: {}", updateUser);
-
-        updateUser.setPassword(passwordEncoder.encode(updateUser.getPassword()));
-
-        if (findById(updateUser.getId()).isPresent()) {
-            return userRepository.update(updateUser);
-        }
-
-        throw new NotFoundException("User " + updateUser + "not found");
-    }
 }

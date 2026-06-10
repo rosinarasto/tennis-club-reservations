@@ -5,6 +5,9 @@ import com.tennisclub.reservations.exception.ResourceAlreadyExistsException;
 import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.util.Set;
@@ -58,6 +61,30 @@ class GlobalExceptionHandlerTest {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(response.getBody()).isEqualTo("not found");
+    }
+
+    @Test
+    void handleBadCredentialsException_returnsUnauthorized() {
+        var response = handler.handleBadCredentialsException(new BadCredentialsException("bad credentials"));
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+        assertThat(response.getBody()).isNull();
+    }
+
+    @Test
+    void handleAuthorizationDeniedException_returnsForbidden() {
+        var response = handler.handleAuthorizationDeniedException(new AuthorizationDeniedException("access denied"));
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        assertThat(response.getBody()).isNull();
+    }
+
+    @Test
+    void handleJwtException_returnsUnauthorized() {
+        var response = handler.handleJwtException(new JwtException("invalid token"));
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+        assertThat(response.getBody()).isNull();
     }
 
     @Test
