@@ -17,4 +17,5 @@ public abstract class ApiUris {
 
     public static final String AUTH_URI               = BASE_URI + "/auth";
     public static final String LOGIN_URI              = "/login";
+    public static final String REFRESH_URI            = "/refresh";
 }

@@ -1,6 +1,7 @@
 package com.tennisclub.reservations.config;
 
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,13 +18,18 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
+import org.springframework.security.oauth2.core.OAuth2Error;
+import org.springframework.security.oauth2.core.OAuth2TokenValidatorResult;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
+import org.springframework.security.oauth2.jwt.JwtTimestampValidator;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationConverter;
 
@@ -48,6 +54,7 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .oauth2ResourceServer(resourceServer -> resourceServer
+                    .bearerTokenResolver(this::resolveBearerToken)
                     .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())));
 
         return http.build();
@@ -75,9 +82,16 @@ public class SecurityConfig {
 
     @Bean
     public JwtDecoder jwtDecoder(@Value("${security.jwt.secret}") String secret) {
-        return NimbusJwtDecoder.withSecretKey(createSecretKey(secret))
+        var decoder = NimbusJwtDecoder.withSecretKey(createSecretKey(secret))
                 .macAlgorithm(MacAlgorithm.HS256)
                 .build();
+
+        decoder.setJwtValidator(new DelegatingOAuth2TokenValidator<>(
+                new JwtTimestampValidator(),
+                this::validateAccessToken
+        ));
+
+        return decoder;
     }
 
     @Bean
@@ -100,5 +114,23 @@ public class SecurityConfig {
 
     private SecretKeySpec createSecretKey(String secret) {
         return new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), HMAC_SHA256);
+    }
+
+    private String resolveBearerToken(HttpServletRequest request) {
+        if (request.getRequestURI().startsWith(ApiUris.AUTH_URI + "/")) {
+            return null;
+        }
+
+        return new DefaultBearerTokenResolver().resolve(request);
+    }
+
+    private OAuth2TokenValidatorResult validateAccessToken(Jwt jwt) {
+        if (com.tennisclub.reservations.security.JwtService.ACCESS_TOKEN_TYPE.equals(
+                jwt.getClaimAsString(com.tennisclub.reservations.security.JwtService.TOKEN_TYPE_CLAIM))) {
+            return OAuth2TokenValidatorResult.success();
+        }
+
+        var error = new OAuth2Error("invalid_token", "Invalid token type", null);
+        return OAuth2TokenValidatorResult.failure(error);
     }
 }

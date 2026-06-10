@@ -73,6 +73,13 @@ public class JwtSecurityTest {
     }
 
     @Test
+    public void securedEndpoint_returnsUnauthorizedWhenRefreshTokenIsUsed() throws Exception {
+        mockMvc.perform(get("/api/surfaces")
+                        .header(HttpHeaders.AUTHORIZATION, refreshBearerToken("USER")))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     public void adminEndpoint_returnsForbiddenWhenUserTokenIsUsed() throws Exception {
         var createDto = SurfaceFactory.createCreateDto("wet");
 
@@ -126,5 +133,14 @@ public class JwtSecurityTest {
                 .build();
 
         return "Bearer " + jwtService.createAccessToken(userDetails);
+    }
+
+    private String refreshBearerToken(String authority) {
+        var userDetails = User.withUsername("+421900000000")
+                .password("")
+                .authorities(authority)
+                .build();
+
+        return "Bearer " + jwtService.createRefreshToken(userDetails);
     }
 }
