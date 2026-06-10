@@ -6,6 +6,7 @@ import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -51,6 +52,11 @@ public class GlobalExceptionHandler  {
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<Void> handleAuthenticationException(AuthenticationException e) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    public ResponseEntity<Void> handleAuthorizationDeniedException(AuthorizationDeniedException e) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
     @ExceptionHandler(Exception.class)

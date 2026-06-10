@@ -6,6 +6,7 @@ import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.util.Set;
@@ -66,6 +67,14 @@ class GlobalExceptionHandlerTest {
         var response = handler.handleBadCredentialsException(new BadCredentialsException("bad credentials"));
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+        assertThat(response.getBody()).isNull();
+    }
+
+    @Test
+    void handleAuthorizationDeniedException_returnsForbidden() {
+        var response = handler.handleAuthorizationDeniedException(new AuthorizationDeniedException("access denied"));
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
         assertThat(response.getBody()).isNull();
     }
 

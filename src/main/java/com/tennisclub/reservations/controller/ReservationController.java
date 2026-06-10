@@ -5,6 +5,8 @@ import com.tennisclub.reservations.mapper.ReservationMapper;
 import com.tennisclub.reservations.model.dto.PaginatedResponse;
 import com.tennisclub.reservations.model.dto.ReservationDto;
 import com.tennisclub.reservations.model.dto.create.ReservationCreateDto;
+import com.tennisclub.reservations.security.annotation.AdminOnly;
+import com.tennisclub.reservations.security.annotation.UserOrAdmin;
 import com.tennisclub.reservations.service.ReservationService;
 import com.tennisclub.reservations.util.PriceCalculationUtil;
 import jakarta.validation.Valid;
@@ -28,6 +30,7 @@ public class ReservationController {
         this.reservationMapper = reservationMapper;
     }
 
+    @UserOrAdmin
     @PostMapping
     public ResponseEntity<BigDecimal> createReservation(@Valid @RequestBody ReservationCreateDto reservationCreateDto) {
         var reservation = reservationService.create(reservationMapper.toEntityFromCreateDto(reservationCreateDto));
@@ -35,12 +38,14 @@ public class ReservationController {
         return ResponseEntity.ok().body(price);
     }
 
+    @AdminOnly
     @PutMapping
     public ResponseEntity<ReservationDto> updateReservation(@Valid @RequestBody ReservationDto updateDto) {
         var reservation = reservationMapper.toEntityFromUpdateDto(updateDto);
         return ResponseEntity.ok(reservationMapper.toDto(reservationService.update(reservation)));
     }
 
+    @AdminOnly
     @DeleteMapping(ApiUris.ID_URI)
     public ResponseEntity<ReservationDto> deleteReservation(@PathVariable long id) {
         var reservation = reservationService.softDeleteById(id);
@@ -49,12 +54,14 @@ public class ReservationController {
                 .orElseGet(() -> ResponseEntity.badRequest().build());
     }
 
+    @UserOrAdmin
     @GetMapping
     public ResponseEntity<PaginatedResponse<ReservationDto>> getReservations(Pageable pageable) {
         var reservations = reservationService.findAll(pageable).map(reservationMapper::toDto);
         return ResponseEntity.ok(PaginatedResponse.from(reservations));
     }
 
+    @UserOrAdmin
     @GetMapping(ApiUris.ID_URI)
     public ResponseEntity<ReservationDto> getReservation(@PathVariable long id) {
         var reservation = reservationService.findById(id);
