@@ -23,7 +23,7 @@ public class ReservationRepositoryImpl extends GenericCrudRepository<Reservation
     }
 
     @Override
-    public boolean isDateAvailable(int number, LocalDateTime from, LocalDateTime to) {
+    public boolean isDateAvailable(Long courtId, LocalDateTime from, LocalDateTime to) {
         var cb = em.getCriteriaBuilder();
         var cq = cb.createQuery(Long.class);
         var court = cq.from(Court.class);
@@ -41,7 +41,7 @@ public class ReservationRepositoryImpl extends GenericCrudRepository<Reservation
 
         cq.select(cb.count(court))
                 .where(
-                        cb.equal(court.get(Court.FIELD_NUMBER), number),
+                        cb.equal(court.get(BaseEntity.FIELD_ID), courtId),
                         cb.equal(court.get(BaseEntity.FIELD_DELETED), false),
                         cb.not(cb.exists(overlappingReservation))
                 );

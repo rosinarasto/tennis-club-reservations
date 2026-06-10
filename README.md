@@ -23,6 +23,20 @@ The API runs on:
 http://localhost:8080
 ```
 
+Swagger UI is available at:
+
+```text
+http://localhost:8080/swagger-ui.html
+```
+
+After a successful Swagger login request, the returned access token is automatically used as the Bearer token for secured endpoints.
+
+The OpenAPI JSON specification is available at:
+
+```text
+http://localhost:8080/v3/api-docs
+```
+
 ## Build And Test
 
 Compile and run tests:
@@ -127,6 +141,23 @@ curl -i -X POST http://localhost:8080/api/auth/refresh \
 
 Refresh tokens are accepted only by `/api/auth/refresh`. Secured API endpoints require an access token.
 
+### Error responses
+
+Error responses use one JSON shape across validation, authentication, authorization and application errors:
+
+```json
+{
+  "timestamp": "2026-06-10T12:00:00Z",
+  "status": 400,
+  "error": "Bad Request",
+  "message": "Validation failed",
+  "path": "/api/reservations",
+  "fieldErrors": {
+    "courtId": "must not be null"
+  }
+}
+```
+
 JWT configuration:
 
 ```properties
@@ -171,7 +202,7 @@ Create court example:
 ```bash
 curl -X POST http://localhost:8080/api/courts \
   -H "Content-Type: application/json" \
-  -d '{"name":"Center Court","number":10,"surface":{"id":1,"minutePrice":0.24,"name":"Hard"}}'
+  -d '{"name":"Center Court","number":10,"surfaceId":1}'
 ```
 
 ### Reservations
@@ -199,16 +230,7 @@ curl -X POST http://localhost:8080/api/reservations \
       "name":"John Doe",
       "phoneNumber":"+421901234567"
     },
-    "court":{
-      "id":1,
-      "name":"Emerald Bay Tennis Center",
-      "number":1,
-      "surface":{
-        "id":1,
-        "minutePrice":0.24,
-        "name":"Hard"
-      }
-    }
+    "courtId":1
   }'
 ```
 

@@ -49,7 +49,7 @@ public class SurfaceControllerTest {
         mockMvc.perform(post("/api/surfaces")
                         .content(convertToJson(createDto))
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(1L))
                 .andExpect(jsonPath("$.name").value("wet"));
     }
@@ -81,11 +81,14 @@ public class SurfaceControllerTest {
         mockMvc.perform(put("/api/surfaces")
                         .content(convertToJson(surfaceDto))
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.message").value("Surface with id 999 not found"))
+                .andExpect(jsonPath("$.path").value("/api/surfaces"));
     }
 
     @Test
-    public void deleteSurface_returnsDeleted() throws Exception {
+    public void deleteSurface_returnsNoContent() throws Exception {
         var deleteSurface = SurfaceFactory.createSurface("wet");
         deleteSurface.setId(1L);
 
@@ -93,15 +96,13 @@ public class SurfaceControllerTest {
                 .thenReturn(Optional.of(deleteSurface));
 
         mockMvc.perform(delete("/api/surfaces/1"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.name").value("wet"));
+                .andExpect(status().isNoContent());
     }
 
     @Test
-    public void deleteAllSurfaces_returnsOkResponse() throws Exception {
+    public void deleteAllSurfaces_returnsNoContent() throws Exception {
         mockMvc.perform(delete("/api/surfaces"))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
     }
 
     @Test
@@ -123,7 +124,10 @@ public class SurfaceControllerTest {
                 .thenReturn(Optional.empty());
 
         mockMvc.perform(get("/api/surfaces/1"))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.message").value("Surface with id 1 not found"))
+                .andExpect(jsonPath("$.path").value("/api/surfaces/1"));
     }
 
     @Test

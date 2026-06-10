@@ -1,5 +1,7 @@
 package com.tennisclub.reservations.controller;
 
+import com.tennisclub.reservations.model.dto.create.ReservationCreateDto;
+import com.tennisclub.reservations.model.dto.update.ReservationUpdateDto;
 import com.tennisclub.reservations.model.entity.Reservation;
 import com.tennisclub.reservations.model.factory.ReservationFactory;
 import com.tennisclub.reservations.service.ReservationService;
@@ -22,7 +24,7 @@ import java.util.Optional;
 import static com.tennisclub.reservations.TestUtils.convertToJson;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -40,14 +42,15 @@ public class ReservationControllerTest {
     private ReservationService reservationService;
 
     @Test
-    public void createReservation_returnsPrice() throws Exception {
+    public void createReservation_returnsReservationIdAndPrice() throws Exception {
         var createDto = ReservationFactory.createCreateDto();
         var reservation = ReservationFactory.createReservation(getTime(13, 30), getTime(15, 0));
+        reservation.setId(1L);
 
-        when(reservationService.create(any(Reservation.class)))
+        when(reservationService.create(any(ReservationCreateDto.class)))
                 .thenReturn(reservation);
 
-        when(reservationService.isDateAvailable(anyInt(), any(LocalDateTime.class), any(LocalDateTime.class)))
+        when(reservationService.isDateAvailable(anyLong(), any(LocalDateTime.class), any(LocalDateTime.class)))
                 .thenReturn(true);
 
         var expected = BigDecimal.valueOf(126.0);
@@ -55,29 +58,29 @@ public class ReservationControllerTest {
         mockMvc.perform(post("/api/reservations")
                         .content(convertToJson(createDto))
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").value(expected.toString()));
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.reservationId").value(1L))
+                .andExpect(jsonPath("$.price").value(expected.doubleValue()));
     }
 
     @Test
     public void updateReservation_returnsUpdatedReservation() throws Exception {
-        var reservationDto = ReservationFactory.createDto();
-        reservationDto.setId(1L);
+        var updateDto = ReservationFactory.createUpdateDto(1L);
         var reservation = ReservationFactory.createReservation(getTime(13, 30), getTime(15, 0));
         reservation.setId(1L);
 
-        when(reservationService.update(any(Reservation.class)))
+        when(reservationService.update(any(ReservationUpdateDto.class)))
                 .thenReturn(reservation);
 
         mockMvc.perform(put("/api/reservations")
-                        .content(convertToJson(reservationDto))
+                        .content(convertToJson(updateDto))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1L));
     }
 
     @Test
-    public void deleteReservation_returnsDeletedReservation() throws Exception {
+    public void deleteReservation_returnsNoContent() throws Exception {
         var reservation = ReservationFactory.createReservation(getTime(13, 30), getTime(15, 0));
         reservation.setId(1L);
 
@@ -85,8 +88,7 @@ public class ReservationControllerTest {
                 .thenReturn(Optional.of(reservation));
 
         mockMvc.perform(delete("/api/reservations/1"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1L));
+                .andExpect(status().isNoContent());
     }
 
     @Test
@@ -108,7 +110,10 @@ public class ReservationControllerTest {
                 .thenReturn(Optional.empty());
 
         mockMvc.perform(get("/api/reservations/1"))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.message").value("Reservation with id 1 not found"))
+                .andExpect(jsonPath("$.path").value("/api/reservations/1"));
     }
 
     @Test

@@ -63,13 +63,19 @@ public class AuthControllerTest {
         mockMvc.perform(post("/api/auth/login")
                         .content(convertToJson(new AuthRequestDto(PHONE_NUMBER, "wrong-password")))
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.status").value(401))
+                .andExpect(jsonPath("$.message").value("Invalid credentials"))
+                .andExpect(jsonPath("$.path").value("/api/auth/login"));
     }
 
     @Test
     public void login_returnsBadRequestWhenBodyIsMissing() throws Exception {
         mockMvc.perform(post("/api/auth/login"))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.message").value("Request body is missing or invalid"))
+                .andExpect(jsonPath("$.path").value("/api/auth/login"));
     }
 
     @Test
@@ -97,7 +103,10 @@ public class AuthControllerTest {
         mockMvc.perform(post("/api/auth/refresh")
                         .content(convertToJson(new RefreshTokenDto("")))
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.message").value("Validation failed"))
+                .andExpect(jsonPath("$.path").value("/api/auth/refresh"));
     }
 
     @Test
@@ -105,7 +114,10 @@ public class AuthControllerTest {
         mockMvc.perform(post("/api/auth/refresh")
                         .content(convertToJson(new RefreshTokenDto("invalid-token")))
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.status").value(401))
+                .andExpect(jsonPath("$.message").value("Invalid token"))
+                .andExpect(jsonPath("$.path").value("/api/auth/refresh"));
     }
 
     @Test
@@ -126,7 +138,10 @@ public class AuthControllerTest {
         mockMvc.perform(post("/api/auth/refresh")
                         .content(convertToJson(new RefreshTokenDto(refreshToken)))
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.status").value(401))
+                .andExpect(jsonPath("$.message").value("Authentication failed"))
+                .andExpect(jsonPath("$.path").value("/api/auth/refresh"));
     }
 
     private void mockUser() {

@@ -1,8 +1,8 @@
 package com.tennisclub.reservations.model.factory;
 
-import com.tennisclub.reservations.model.dto.CourtDto;
 import com.tennisclub.reservations.model.dto.ReservationDto;
 import com.tennisclub.reservations.model.dto.create.ReservationCreateDto;
+import com.tennisclub.reservations.model.dto.update.ReservationUpdateDto;
 import com.tennisclub.reservations.model.GameType;
 import com.tennisclub.reservations.model.entity.Reservation;
 
@@ -23,11 +23,17 @@ public class ReservationFactory {
         return new ReservationDto(DEFAULT_FROM, DEFAULT_TO, DEFAULT_GAME_TYPE, UserFactory.createDto(), CourtFactory.createDto(4));
     }
 
-    public static ReservationCreateDto createCreateDto(CourtDto courtDto, LocalDateTime from, LocalDateTime to) {
-        return new ReservationCreateDto(from, to, DEFAULT_GAME_TYPE, UserFactory.createCreateDto(), courtDto);
+    public static ReservationCreateDto createCreateDto(Long courtId, LocalDateTime from, LocalDateTime to) {
+        return new ReservationCreateDto(from, to, DEFAULT_GAME_TYPE, UserFactory.createCreateDto(), courtId);
     }
 
     public static ReservationCreateDto createCreateDto() {
-        return new ReservationCreateDto(DEFAULT_FROM, DEFAULT_TO, DEFAULT_GAME_TYPE, UserFactory.createCreateDto(), CourtFactory.createDto(4));
+        return new ReservationCreateDto(DEFAULT_FROM, DEFAULT_TO, DEFAULT_GAME_TYPE, UserFactory.createCreateDto(), 1L);
+    }
+
+    public static ReservationUpdateDto createUpdateDto(Long id) {
+        var dto = new ReservationUpdateDto(DEFAULT_FROM, DEFAULT_TO, DEFAULT_GAME_TYPE, UserFactory.createCreateDto(), 1L);
+        dto.setId(id);
+        return dto;
     }
 }

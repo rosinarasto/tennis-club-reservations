@@ -1,6 +1,5 @@
 package com.tennisclub.reservations.validator;
 
-import com.tennisclub.reservations.model.dto.CourtDto;
 import com.tennisclub.reservations.service.ReservationService;
 import com.tennisclub.reservations.validator.annotation.AvailableDate;
 import jakarta.validation.ConstraintValidator;
@@ -37,22 +36,22 @@ public class AvailableDateValidator implements ConstraintValidator<AvailableDate
     public boolean isValid(final Object value, final ConstraintValidatorContext context) {
         log.info("Checking availability of chosen date range.");
 
-        CourtDto courtDto;
+        Long courtId;
         LocalDateTime from;
         LocalDateTime to;
 
         try {
-            courtDto = (CourtDto) PropertyUtils.getProperty(value, courtField);
+            courtId = (Long) PropertyUtils.getProperty(value, courtField);
             from = (LocalDateTime) PropertyUtils.getProperty(value, fromField);
             to = (LocalDateTime) PropertyUtils.getProperty(value, toField);
         } catch (InvocationTargetException | ClassCastException | IllegalAccessException | NoSuchMethodException ignored) {
             return false;
         }
 
-        if (courtDto == null || from == null || to == null || !from.isBefore(to)) {
+        if (courtId == null || from == null || to == null || !from.isBefore(to)) {
             return false;
         }
 
-        return reservationService.isDateAvailable(courtDto.getNumber(), from, to);
+        return reservationService.isDateAvailable(courtId, from, to);
     }
 }

@@ -1,6 +1,12 @@
 package com.tennisclub.reservations.service.impl;
 
+import com.tennisclub.reservations.exception.NotFoundException;
+import com.tennisclub.reservations.model.GameType;
+import com.tennisclub.reservations.model.dto.create.ReservationCreateDto;
+import com.tennisclub.reservations.model.dto.create.UserCreateDto;
+import com.tennisclub.reservations.model.dto.update.ReservationUpdateDto;
 import com.tennisclub.reservations.model.entity.Reservation;
+import com.tennisclub.reservations.model.entity.User;
 import com.tennisclub.reservations.repository.ReservationRepository;
 import com.tennisclub.reservations.service.CourtService;
 import com.tennisclub.reservations.service.ReservationService;
@@ -35,24 +41,41 @@ public class ReservationServiceImpl extends GenericCrudService<Reservation> impl
     }
 
     @Override
-    public Reservation create(Reservation reservation) {
-        log.info("Creating new reservation {}", reservation);
+    public Reservation create(ReservationCreateDto createDto) {
+        log.info("Creating new reservation {}", createDto);
 
-        var user = userService.getOrCreate(reservation.getUser());
-        var courtNumber = reservation.getCourt().getNumber();
-        var court = courtService.findByNumber(courtNumber);
-
-        reservation.setUser(user);
-        reservation.setCourt(court);
+        var reservation = buildReservation(
+                createDto.getFrom(),
+                createDto.getTo(),
+                createDto.getGameType(),
+                createDto.getUser(),
+                createDto.getCourtId()
+        );
 
         return reservationRepository.save(reservation);
     }
 
     @Override
-    public boolean isDateAvailable(int number, LocalDateTime from, LocalDateTime to) {
-        log.info("isDateAvailable for court number {} from {} to {}", number, from, to);
+    public Reservation update(ReservationUpdateDto updateDto) {
+        log.info("Updating reservation {}", updateDto);
 
-        return reservationRepository.isDateAvailable(number, from, to);
+        var reservation = buildReservation(
+                updateDto.getFrom(),
+                updateDto.getTo(),
+                updateDto.getGameType(),
+                updateDto.getUser(),
+                updateDto.getCourtId()
+        );
+        reservation.setId(updateDto.getId());
+
+        return super.update(reservation);
+    }
+
+    @Override
+    public boolean isDateAvailable(Long courtId, LocalDateTime from, LocalDateTime to) {
+        log.info("isDateAvailable for court id {} from {} to {}", courtId, from, to);
+
+        return reservationRepository.isDateAvailable(courtId, from, to);
     }
 
     @Override
@@ -67,5 +90,23 @@ public class ReservationServiceImpl extends GenericCrudService<Reservation> impl
         log.info("Finding reservations for user phone number {}", phoneNumber);
 
         return reservationRepository.findByUserPhoneNumberOrderByFrom(phoneNumber, future, LocalDateTime.now());
+    }
+
+    private Reservation buildReservation(
+            LocalDateTime from,
+            LocalDateTime to,
+            GameType gameType,
+            UserCreateDto userDto,
+            Long courtId
+    ) {
+        var userToCreate = new User();
+        userToCreate.setName(userDto.getName());
+        userToCreate.setPhoneNumber(userDto.getPhoneNumber());
+
+        var user = userService.getOrCreate(userToCreate);
+        var court = courtService.findById(courtId)
+                .orElseThrow(() -> new NotFoundException("Court with id " + courtId + " not found"));
+
+        return new Reservation(from, to, gameType, user, court);
     }
 }

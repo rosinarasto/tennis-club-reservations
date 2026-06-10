@@ -1,12 +1,14 @@
 package com.tennisclub.reservations.controller;
 
 import com.tennisclub.reservations.config.ApiUris;
+import com.tennisclub.reservations.exception.NotFoundException;
 import com.tennisclub.reservations.mapper.CourtMapper;
 import com.tennisclub.reservations.mapper.ReservationMapper;
 import com.tennisclub.reservations.model.dto.CourtDto;
 import com.tennisclub.reservations.model.dto.PaginatedResponse;
 import com.tennisclub.reservations.model.dto.ReservationDto;
 import com.tennisclub.reservations.model.dto.create.CourtCreateDto;
+import com.tennisclub.reservations.model.dto.update.CourtUpdateDto;
 import com.tennisclub.reservations.model.Role;
 import com.tennisclub.reservations.security.annotation.RequiredRoles;
 import com.tennisclub.reservations.service.CourtService;
@@ -14,6 +16,7 @@ import com.tennisclub.reservations.service.ReservationService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -44,31 +47,28 @@ public class CourtController {
     @RequiredRoles(Role.ADMIN)
     @PostMapping
     public ResponseEntity<CourtDto> createCourt(@Valid @RequestBody CourtCreateDto createDto) {
-        var court = courtMapper.toEntityFromCreateDto(createDto);
-        return ResponseEntity.ok(courtMapper.toDto(courtService.create(court)));
+        return ResponseEntity.status(HttpStatus.CREATED).body(courtMapper.toDto(courtService.create(createDto)));
     }
 
     @RequiredRoles(Role.ADMIN)
     @PutMapping
-    public ResponseEntity<CourtDto> updateCourt(@Valid @RequestBody CourtDto updateDto) {
-        var court = courtMapper.toEntityFromUpdateDto(updateDto);
-        return ResponseEntity.ok(courtMapper.toDto(courtService.update(court)));
+    public ResponseEntity<CourtDto> updateCourt(@Valid @RequestBody CourtUpdateDto updateDto) {
+        return ResponseEntity.ok(courtMapper.toDto(courtService.update(updateDto)));
     }
 
     @RequiredRoles(Role.ADMIN)
     @DeleteMapping
     public ResponseEntity<Void> deleteCourts(Pageable pageable) {
         courtService.softDeleteAll(pageable);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @RequiredRoles(Role.ADMIN)
     @DeleteMapping(ApiUris.ID_URI)
-    public ResponseEntity<CourtDto> deleteCourt(@PathVariable long id) {
-        var court = courtService.softDeleteById(id);
-        return court.map(courtMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.badRequest().build());
+    public ResponseEntity<Void> deleteCourt(@PathVariable long id) {
+        courtService.softDeleteById(id)
+                .orElseThrow(() -> new NotFoundException("Court with id " + id + " not found"));
+        return ResponseEntity.noContent().build();
     }
 
     @RequiredRoles({Role.USER, Role.ADMIN})
@@ -81,10 +81,10 @@ public class CourtController {
     @RequiredRoles({Role.USER, Role.ADMIN})
     @GetMapping(ApiUris.ID_URI)
     public ResponseEntity<CourtDto> getCourt(@PathVariable long id) {
-        var court = courtService.findById(id);
-        return court.map(courtMapper::toDto)
+        return courtService.findById(id)
+                .map(courtMapper::toDto)
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.badRequest().build());
+                .orElseThrow(() -> new NotFoundException("Court with id " + id + " not found"));
     }
 
     @RequiredRoles({Role.USER, Role.ADMIN})

@@ -1,7 +1,7 @@
 package com.tennisclub.reservations.controller;
 
+import com.tennisclub.reservations.model.dto.create.ReservationCreateDto;
 import com.tennisclub.reservations.model.Role;
-import com.tennisclub.reservations.model.entity.Reservation;
 import com.tennisclub.reservations.model.entity.Surface;
 import com.tennisclub.reservations.model.factory.ReservationFactory;
 import com.tennisclub.reservations.model.factory.SurfaceFactory;
@@ -25,9 +25,11 @@ import java.util.List;
 
 import static com.tennisclub.reservations.TestUtils.convertToJson;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(properties = {
@@ -53,14 +55,46 @@ public class JwtSecurityTest {
     @Test
     public void securedEndpoint_returnsUnauthorizedWhenTokenIsMissing() throws Exception {
         mockMvc.perform(get("/api/surfaces"))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.status").value(401))
+                .andExpect(jsonPath("$.message").value("Authentication failed"))
+                .andExpect(jsonPath("$.path").value("/api/surfaces"));
     }
 
     @Test
     public void securedEndpoint_returnsUnauthorizedWhenTokenIsInvalid() throws Exception {
         mockMvc.perform(get("/api/surfaces")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer invalid-token"))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.status").value(401))
+                .andExpect(jsonPath("$.message").value("Authentication failed"))
+                .andExpect(jsonPath("$.path").value("/api/surfaces"));
+    }
+
+    @Test
+    public void openApiDocs_returnOkWhenTokenIsMissing() throws Exception {
+        mockMvc.perform(get("/v3/api-docs"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void openApiDocs_markSecuredEndpointsWithBearerAuth() throws Exception {
+        mockMvc.perform(get("/v3/api-docs"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.components.securitySchemes.bearerAuth.type").value("http"))
+                .andExpect(jsonPath("$.components.securitySchemes.bearerAuth.scheme").value("bearer"))
+                .andExpect(jsonPath("$.paths['/api/courts/{id}'].get.security[0].bearerAuth").isArray())
+                .andExpect(jsonPath("$.paths['/api/auth/login'].post.security").doesNotExist());
+    }
+
+    @Test
+    public void swaggerUi_autoAuthorizesAccessTokenFromLoginResponse() throws Exception {
+        mockMvc.perform(get("/swagger-ui/swagger-initializer.js"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("responseInterceptor")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("url.pathname === '/api/auth/login'")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("window.ui.authActions.authorize")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("bearerAuth")));
     }
 
     @Test
@@ -77,7 +111,10 @@ public class JwtSecurityTest {
     public void securedEndpoint_returnsUnauthorizedWhenRefreshTokenIsUsed() throws Exception {
         mockMvc.perform(get("/api/surfaces")
                         .header(HttpHeaders.AUTHORIZATION, refreshBearerToken(Role.USER.getValue())))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.status").value(401))
+                .andExpect(jsonPath("$.message").value("Authentication failed"))
+                .andExpect(jsonPath("$.path").value("/api/surfaces"));
     }
 
     @Test
@@ -88,7 +125,10 @@ public class JwtSecurityTest {
                         .header(HttpHeaders.AUTHORIZATION, bearerToken(Role.USER.getValue()))
                         .content(convertToJson(createDto))
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.status").value(403))
+                .andExpect(jsonPath("$.message").value("Access denied"))
+                .andExpect(jsonPath("$.path").value("/api/surfaces"));
     }
 
     @Test
@@ -104,7 +144,7 @@ public class JwtSecurityTest {
                         .header(HttpHeaders.AUTHORIZATION, bearerToken(Role.ADMIN.getValue()))
                         .content(convertToJson(createDto))
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
     }
 
     @Test
@@ -115,16 +155,16 @@ public class JwtSecurityTest {
                 LocalDateTime.of(2026, 12, 31, 15, 0)
         );
 
-        when(reservationService.isDateAvailable(anyInt(), any(LocalDateTime.class), any(LocalDateTime.class)))
+        when(reservationService.isDateAvailable(anyLong(), any(LocalDateTime.class), any(LocalDateTime.class)))
                 .thenReturn(true);
-        when(reservationService.create(any(Reservation.class)))
+        when(reservationService.create(any(ReservationCreateDto.class)))
                 .thenReturn(reservation);
 
         mockMvc.perform(post("/api/reservations")
                         .header(HttpHeaders.AUTHORIZATION, bearerToken(Role.USER.getValue()))
                         .content(convertToJson(createDto))
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
     }
 
     private String bearerToken(String authority) {

@@ -15,6 +15,12 @@ public class SurfaceFactory {
         return new Surface(DEFAULT_MINUTE_PRICE, name, null);
     }
 
+    public static Surface createSurface(Long id) {
+        var surface = createSurface();
+        surface.setId(id);
+        return surface;
+    }
+
     public static Surface createSurface() {
         return new Surface(DEFAULT_MINUTE_PRICE, DEFAULT_NAME, null);
     }

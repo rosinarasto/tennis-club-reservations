@@ -69,70 +69,70 @@ public class ReservationRepositoryTest {
 
     @Test
     public void isDateAvailable_returnsFalseWhenRequestedIntervalOverlapsReservationStart() {
-        persistReservation(getTime(12, 0), getTime(13, 30), false);
+        var courtId = persistReservation(getTime(12, 0), getTime(13, 30), false);
 
-        var actual = reservationRepository.isDateAvailable(4, getTime(11, 30), getTime(12, 15));
+        var actual = reservationRepository.isDateAvailable(courtId, getTime(11, 30), getTime(12, 15));
 
         assertThat(actual).isFalse();
     }
 
     @Test
     public void isDateAvailable_returnsFalseWhenRequestedIntervalOverlapsReservationEnd() {
-        persistReservation(getTime(12, 0), getTime(13, 30), false);
+        var courtId = persistReservation(getTime(12, 0), getTime(13, 30), false);
 
-        var actual = reservationRepository.isDateAvailable(4, getTime(12, 30), getTime(13, 45));
+        var actual = reservationRepository.isDateAvailable(courtId, getTime(12, 30), getTime(13, 45));
 
         assertThat(actual).isFalse();
     }
 
     @Test
     public void isDateAvailable_returnsFalseWhenRequestedIntervalEqualsExistingReservation() {
-        persistReservation(getTime(12, 0), getTime(13, 30), false);
+        var courtId = persistReservation(getTime(12, 0), getTime(13, 30), false);
 
-        var actual = reservationRepository.isDateAvailable(4, getTime(12, 0), getTime(13, 30));
+        var actual = reservationRepository.isDateAvailable(courtId, getTime(12, 0), getTime(13, 30));
 
         assertThat(actual).isFalse();
     }
 
     @Test
     public void isDateAvailable_returnsFalseWhenRequestedIntervalContainsExistingReservation() {
-        persistReservation(getTime(12, 0), getTime(13, 30), false);
+        var courtId = persistReservation(getTime(12, 0), getTime(13, 30), false);
 
-        var actual = reservationRepository.isDateAvailable(4, getTime(11, 30), getTime(14, 0));
+        var actual = reservationRepository.isDateAvailable(courtId, getTime(11, 30), getTime(14, 0));
 
         assertThat(actual).isFalse();
     }
 
     @Test
     public void isDateAvailable_returnsTrueWhenRequestedIntervalEndsAtExistingReservationStart() {
-        persistReservation(getTime(12, 0), getTime(13, 30), false);
+        var courtId = persistReservation(getTime(12, 0), getTime(13, 30), false);
 
-        var actual = reservationRepository.isDateAvailable(4, getTime(11, 0), getTime(12, 0));
+        var actual = reservationRepository.isDateAvailable(courtId, getTime(11, 0), getTime(12, 0));
 
         assertThat(actual).isTrue();
     }
 
     @Test
     public void isDateAvailable_returnsTrueWhenRequestedIntervalStartsAtExistingReservationEnd() {
-        persistReservation(getTime(12, 0), getTime(13, 30), false);
+        var courtId = persistReservation(getTime(12, 0), getTime(13, 30), false);
 
-        var actual = reservationRepository.isDateAvailable(4, getTime(13, 30), getTime(14, 0));
+        var actual = reservationRepository.isDateAvailable(courtId, getTime(13, 30), getTime(14, 0));
 
         assertThat(actual).isTrue();
     }
 
     @Test
     public void isDateAvailable_ignoresDeletedReservations() {
-        persistReservation(getTime(12, 0), getTime(13, 30), true);
+        var courtId = persistReservation(getTime(12, 0), getTime(13, 30), true);
 
-        var actual = reservationRepository.isDateAvailable(4, getTime(12, 30), getTime(13, 0));
+        var actual = reservationRepository.isDateAvailable(courtId, getTime(12, 30), getTime(13, 0));
 
         assertThat(actual).isTrue();
     }
 
     @Test
     public void isDateAvailable_returnsFalseWhenCourtDoesNotExist() {
-        var actual = reservationRepository.isDateAvailable(4, getTime(12, 0), getTime(13, 30));
+        var actual = reservationRepository.isDateAvailable(4L, getTime(12, 0), getTime(13, 30));
 
         assertThat(actual).isFalse();
     }
@@ -144,9 +144,10 @@ public class ReservationRepositoryTest {
         em.persist(court.getSurface());
         em.persist(court);
         em.flush();
+        var courtId = court.getId();
         em.clear();
 
-        var actual = reservationRepository.isDateAvailable(4, getTime(12, 0), getTime(13, 30));
+        var actual = reservationRepository.isDateAvailable(courtId, getTime(12, 0), getTime(13, 30));
 
         assertThat(actual).isFalse();
     }
@@ -260,7 +261,7 @@ public class ReservationRepositoryTest {
         assertThat(actual).isEmpty();
     }
 
-    private void persistReservation(LocalDateTime from, LocalDateTime to, boolean deleted) {
+    private Long persistReservation(LocalDateTime from, LocalDateTime to, boolean deleted) {
         var court = CourtFactory.createCourt(4);
         var user = UserFactory.createUser("user", "123456789");
         var reservation = ReservationFactory.createReservation(from, to);
@@ -277,7 +278,9 @@ public class ReservationRepositoryTest {
         em.persist(user);
         em.persist(reservation);
         em.flush();
+        var courtId = court.getId();
         em.clear();
+        return courtId;
     }
 
     private void updateCreationDate(Long id, LocalDateTime creationDate) {

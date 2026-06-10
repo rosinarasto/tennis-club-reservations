@@ -1,6 +1,5 @@
 package com.tennisclub.reservations.validator;
 
-import com.tennisclub.reservations.model.factory.CourtFactory;
 import com.tennisclub.reservations.model.factory.ReservationFactory;
 import com.tennisclub.reservations.service.ReservationService;
 import com.tennisclub.reservations.validator.annotation.AvailableDate;
@@ -28,10 +27,10 @@ public class AvailableDateValidatorTest {
         var constraintAnnotation = new AnnotationDescriptor.Builder<>(AvailableDate.class).build().getAnnotation();
         validator.initialize(constraintAnnotation);
 
-        var courtDto = CourtFactory.createDto(4);
-        var reservationCreateDto = ReservationFactory.createCreateDto(courtDto, getTime(12, 0), getTime(13, 15));
+        var courtId = 1L;
+        var reservationCreateDto = ReservationFactory.createCreateDto(courtId, getTime(12, 0), getTime(13, 15));
 
-        when(reservationService.isDateAvailable(courtDto.getNumber(), getTime(12, 0), getTime(13, 15)))
+        when(reservationService.isDateAvailable(courtId, getTime(12, 0), getTime(13, 15)))
                 .thenReturn(true);
 
         assertThat(validator.isValid(reservationCreateDto, null)).isTrue();
@@ -43,10 +42,10 @@ public class AvailableDateValidatorTest {
         var constraintAnnotation = new AnnotationDescriptor.Builder<>(AvailableDate.class).build().getAnnotation();
         validator.initialize(constraintAnnotation);
 
-        var courtDto = CourtFactory.createDto(4);
-        var reservationCreateDto = ReservationFactory.createCreateDto(courtDto, getTime(12, 0), getTime(13, 15));
+        var courtId = 1L;
+        var reservationCreateDto = ReservationFactory.createCreateDto(courtId, getTime(12, 0), getTime(13, 15));
 
-        when(reservationService.isDateAvailable(courtDto.getNumber(), getTime(12, 0), getTime(13, 15)))
+        when(reservationService.isDateAvailable(courtId, getTime(12, 0), getTime(13, 15)))
                 .thenReturn(false);
 
         assertThat(validator.isValid(reservationCreateDto, null)).isFalse();
@@ -58,11 +57,11 @@ public class AvailableDateValidatorTest {
         var constraintAnnotation = new AnnotationDescriptor.Builder<>(AvailableDate.class).build().getAnnotation();
         validator.initialize(constraintAnnotation);
 
-        var courtDto = CourtFactory.createDto(4);
-        var reservationCreateDto = ReservationFactory.createCreateDto(courtDto, getTime(13, 15), getTime(12, 0));
+        var courtId = 1L;
+        var reservationCreateDto = ReservationFactory.createCreateDto(courtId, getTime(13, 15), getTime(12, 0));
 
         assertThat(validator.isValid(reservationCreateDto, null)).isFalse();
-        verify(reservationService, never()).isDateAvailable(courtDto.getNumber(), getTime(13, 15), getTime(12, 0));
+        verify(reservationService, never()).isDateAvailable(courtId, getTime(13, 15), getTime(12, 0));
     }
 
     private LocalDateTime getTime(int hour, int minute) {
