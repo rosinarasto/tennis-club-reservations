@@ -119,7 +119,10 @@ public class CourtControllerTest {
                 .thenReturn(Optional.empty());
 
         mockMvc.perform(get("/api/courts/1"))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.message").value("Court with id 1 not found"))
+                .andExpect(jsonPath("$.path").value("/api/courts/1"));
     }
 
     @Test

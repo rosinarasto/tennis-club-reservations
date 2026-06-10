@@ -109,7 +109,10 @@ public class ReservationControllerTest {
                 .thenReturn(Optional.empty());
 
         mockMvc.perform(get("/api/reservations/1"))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.message").value("Reservation with id 1 not found"))
+                .andExpect(jsonPath("$.path").value("/api/reservations/1"));
     }
 
     @Test

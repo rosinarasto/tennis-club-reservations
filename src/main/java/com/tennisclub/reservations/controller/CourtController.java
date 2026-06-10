@@ -1,6 +1,7 @@
 package com.tennisclub.reservations.controller;
 
 import com.tennisclub.reservations.config.ApiUris;
+import com.tennisclub.reservations.exception.NotFoundException;
 import com.tennisclub.reservations.mapper.CourtMapper;
 import com.tennisclub.reservations.mapper.ReservationMapper;
 import com.tennisclub.reservations.model.dto.CourtDto;
@@ -64,10 +65,10 @@ public class CourtController {
     @RequiredRoles(Role.ADMIN)
     @DeleteMapping(ApiUris.ID_URI)
     public ResponseEntity<CourtDto> deleteCourt(@PathVariable long id) {
-        var court = courtService.softDeleteById(id);
-        return court.map(courtMapper::toDto)
+        return courtService.softDeleteById(id)
+                .map(courtMapper::toDto)
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.badRequest().build());
+                .orElseThrow(() -> new NotFoundException("Court with id " + id + " not found"));
     }
 
     @RequiredRoles({Role.USER, Role.ADMIN})
@@ -80,10 +81,10 @@ public class CourtController {
     @RequiredRoles({Role.USER, Role.ADMIN})
     @GetMapping(ApiUris.ID_URI)
     public ResponseEntity<CourtDto> getCourt(@PathVariable long id) {
-        var court = courtService.findById(id);
-        return court.map(courtMapper::toDto)
+        return courtService.findById(id)
+                .map(courtMapper::toDto)
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.badRequest().build());
+                .orElseThrow(() -> new NotFoundException("Court with id " + id + " not found"));
     }
 
     @RequiredRoles({Role.USER, Role.ADMIN})

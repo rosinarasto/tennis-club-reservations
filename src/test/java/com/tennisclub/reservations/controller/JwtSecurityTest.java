@@ -55,14 +55,20 @@ public class JwtSecurityTest {
     @Test
     public void securedEndpoint_returnsUnauthorizedWhenTokenIsMissing() throws Exception {
         mockMvc.perform(get("/api/surfaces"))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.status").value(401))
+                .andExpect(jsonPath("$.message").value("Authentication failed"))
+                .andExpect(jsonPath("$.path").value("/api/surfaces"));
     }
 
     @Test
     public void securedEndpoint_returnsUnauthorizedWhenTokenIsInvalid() throws Exception {
         mockMvc.perform(get("/api/surfaces")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer invalid-token"))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.status").value(401))
+                .andExpect(jsonPath("$.message").value("Authentication failed"))
+                .andExpect(jsonPath("$.path").value("/api/surfaces"));
     }
 
     @Test
@@ -105,7 +111,10 @@ public class JwtSecurityTest {
     public void securedEndpoint_returnsUnauthorizedWhenRefreshTokenIsUsed() throws Exception {
         mockMvc.perform(get("/api/surfaces")
                         .header(HttpHeaders.AUTHORIZATION, refreshBearerToken(Role.USER.getValue())))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.status").value(401))
+                .andExpect(jsonPath("$.message").value("Authentication failed"))
+                .andExpect(jsonPath("$.path").value("/api/surfaces"));
     }
 
     @Test
@@ -116,7 +125,10 @@ public class JwtSecurityTest {
                         .header(HttpHeaders.AUTHORIZATION, bearerToken(Role.USER.getValue()))
                         .content(convertToJson(createDto))
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.status").value(403))
+                .andExpect(jsonPath("$.message").value("Access denied"))
+                .andExpect(jsonPath("$.path").value("/api/surfaces"));
     }
 
     @Test

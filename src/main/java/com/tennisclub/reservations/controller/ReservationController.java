@@ -1,6 +1,7 @@
 package com.tennisclub.reservations.controller;
 
 import com.tennisclub.reservations.config.ApiUris;
+import com.tennisclub.reservations.exception.NotFoundException;
 import com.tennisclub.reservations.mapper.ReservationMapper;
 import com.tennisclub.reservations.model.dto.PaginatedResponse;
 import com.tennisclub.reservations.model.dto.ReservationDto;
@@ -48,10 +49,10 @@ public class ReservationController {
     @RequiredRoles(Role.ADMIN)
     @DeleteMapping(ApiUris.ID_URI)
     public ResponseEntity<ReservationDto> deleteReservation(@PathVariable long id) {
-        var reservation = reservationService.softDeleteById(id);
-        return reservation.map(reservationMapper::toDto)
+        return reservationService.softDeleteById(id)
+                .map(reservationMapper::toDto)
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.badRequest().build());
+                .orElseThrow(() -> new NotFoundException("Reservation with id " + id + " not found"));
     }
 
     @RequiredRoles({Role.USER, Role.ADMIN})
@@ -64,9 +65,9 @@ public class ReservationController {
     @RequiredRoles({Role.USER, Role.ADMIN})
     @GetMapping(ApiUris.ID_URI)
     public ResponseEntity<ReservationDto> getReservation(@PathVariable long id) {
-        var reservation = reservationService.findById(id);
-        return reservation.map(reservationMapper::toDto)
+        return reservationService.findById(id)
+                .map(reservationMapper::toDto)
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.badRequest().build());
+                .orElseThrow(() -> new NotFoundException("Reservation with id " + id + " not found"));
     }
 }

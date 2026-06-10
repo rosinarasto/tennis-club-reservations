@@ -13,6 +13,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -22,78 +23,91 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void handleNullPointerException_returnsBadRequest() {
-        var response = handler.handleNullPointerException(new NullPointerException("missing"));
+        var response = handler.handleNullPointerException(new NullPointerException("missing"), request());
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(response.getBody()).isEqualTo("missing");
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().message()).isEqualTo("missing");
+        assertThat(response.getBody().path()).isEqualTo("/api/test");
     }
 
     @Test
     void handleResourceAlreadyExistsException_returnsBadRequest() {
-        var response = handler.handleResourceAlreadyExistsException(new ResourceAlreadyExistsException("exists"));
+        var response = handler.handleResourceAlreadyExistsException(new ResourceAlreadyExistsException("exists"), request());
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(response.getBody()).isEqualTo("exists");
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().message()).isEqualTo("exists");
     }
 
     @Test
     void handleConstraintViolation_returnsBadRequest() {
-        var response = handler.handleConstraintViolation(new ConstraintViolationException("invalid", Set.of()));
+        var response = handler.handleConstraintViolation(new ConstraintViolationException("invalid", Set.of()), request());
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(response.getBody()).contains("Validation error: invalid");
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().message()).isEqualTo("Validation failed");
     }
 
     @Test
     void handleMethodArgumentNotValid_returnsBadRequest() {
-        var exception = mock(MethodArgumentNotValidException.class);
-        when(exception.getMessage()).thenReturn("invalid body");
+        var exception = mock(MethodArgumentNotValidException.class, RETURNS_DEEP_STUBS);
 
-        var response = handler.handleMethodArgumentNotValid(exception);
+        var response = handler.handleMethodArgumentNotValid(exception, request());
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(response.getBody()).contains("Validation error: invalid body");
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().message()).isEqualTo("Validation failed");
     }
 
     @Test
     void handleNotFoundException_returnsBadRequest() {
-        var response = handler.handleNotFoundException(new NotFoundException("not found"));
+        var response = handler.handleNotFoundException(new NotFoundException("not found"), request());
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(response.getBody()).isEqualTo("not found");
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().message()).isEqualTo("not found");
     }
 
     @Test
     void handleBadCredentialsException_returnsUnauthorized() {
-        var response = handler.handleBadCredentialsException(new BadCredentialsException("bad credentials"));
+        var response = handler.handleBadCredentialsException(new BadCredentialsException("bad credentials"), request());
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
-        assertThat(response.getBody()).isNull();
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().message()).isEqualTo("Invalid credentials");
     }
 
     @Test
     void handleAuthorizationDeniedException_returnsForbidden() {
-        var response = handler.handleAuthorizationDeniedException(new AuthorizationDeniedException("access denied"));
+        var response = handler.handleAuthorizationDeniedException(new AuthorizationDeniedException("access denied"), request());
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
-        assertThat(response.getBody()).isNull();
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().message()).isEqualTo("Access denied");
     }
 
     @Test
     void handleJwtException_returnsUnauthorized() {
-        var response = handler.handleJwtException(new JwtException("invalid token"));
+        var response = handler.handleJwtException(new JwtException("invalid token"), request());
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
-        assertThat(response.getBody()).isNull();
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().message()).isEqualTo("Invalid token");
     }
 
     @Test
     void handleGlobalException_returnsInternalServerError() {
-        var response = handler.handleGlobalException(new RuntimeException("failed"), null);
+        var response = handler.handleGlobalException(new RuntimeException("failed"), request());
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
-        assertThat(response.getBody()).isInstanceOfSatisfying(
-                java.util.Map.class,
-                body -> assertThat(body).containsEntry("message", "failed"));
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().message()).isEqualTo("failed");
+    }
+
+    private jakarta.servlet.http.HttpServletRequest request() {
+        var request = mock(jakarta.servlet.http.HttpServletRequest.class);
+        when(request.getRequestURI()).thenReturn("/api/test");
+        return request;
     }
 }

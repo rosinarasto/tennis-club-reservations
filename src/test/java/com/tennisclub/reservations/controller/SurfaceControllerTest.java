@@ -81,7 +81,10 @@ public class SurfaceControllerTest {
         mockMvc.perform(put("/api/surfaces")
                         .content(convertToJson(surfaceDto))
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.message").value("Surface with id 999 not found"))
+                .andExpect(jsonPath("$.path").value("/api/surfaces"));
     }
 
     @Test
@@ -123,7 +126,10 @@ public class SurfaceControllerTest {
                 .thenReturn(Optional.empty());
 
         mockMvc.perform(get("/api/surfaces/1"))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.message").value("Surface with id 1 not found"))
+                .andExpect(jsonPath("$.path").value("/api/surfaces/1"));
     }
 
     @Test

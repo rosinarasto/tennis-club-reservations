@@ -1,6 +1,7 @@
 package com.tennisclub.reservations.controller;
 
 import com.tennisclub.reservations.config.ApiUris;
+import com.tennisclub.reservations.exception.NotFoundException;
 import com.tennisclub.reservations.mapper.SurfaceMapper;
 import com.tennisclub.reservations.model.dto.PaginatedResponse;
 import com.tennisclub.reservations.model.dto.SurfaceDto;
@@ -51,10 +52,10 @@ public class SurfaceController {
     @RequiredRoles(Role.ADMIN)
     @DeleteMapping(ApiUris.ID_URI)
     public ResponseEntity<SurfaceDto> deleteSurface(@PathVariable long id) {
-        var surface = surfaceService.softDeleteById(id);
-        return surface.map(surfaceMapper::toDto)
+        return surfaceService.softDeleteById(id)
+                .map(surfaceMapper::toDto)
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.badRequest().build());
+                .orElseThrow(() -> new NotFoundException("Surface with id " + id + " not found"));
     }
 
     @RequiredRoles({Role.USER, Role.ADMIN})
@@ -67,9 +68,9 @@ public class SurfaceController {
     @RequiredRoles({Role.USER, Role.ADMIN})
     @GetMapping(ApiUris.ID_URI)
     public ResponseEntity<SurfaceDto> getSurface(@PathVariable long id) {
-        var surface = surfaceService.findById(id);
-        return surface.map(surfaceMapper::toDto)
+        return surfaceService.findById(id)
+                .map(surfaceMapper::toDto)
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.badRequest().build());
+                .orElseThrow(() -> new NotFoundException("Surface with id " + id + " not found"));
     }
 }
