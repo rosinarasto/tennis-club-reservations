@@ -324,3 +324,7 @@ src/main/resources
 class_diagram.puml
 use_case_diagram.puml
 ```
+
+## License
+
+This project is licensed under the MIT License. See [LICENSE](LICENSE).
