@@ -144,7 +144,7 @@ public class JwtSecurityTest {
                         .header(HttpHeaders.AUTHORIZATION, bearerToken(Role.ADMIN.getValue()))
                         .content(convertToJson(createDto))
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
     }
 
     @Test
@@ -164,7 +164,7 @@ public class JwtSecurityTest {
                         .header(HttpHeaders.AUTHORIZATION, bearerToken(Role.USER.getValue()))
                         .content(convertToJson(createDto))
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
     }
 
     private String bearerToken(String authority) {

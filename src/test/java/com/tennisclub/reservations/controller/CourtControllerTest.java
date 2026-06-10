@@ -57,7 +57,7 @@ public class CourtControllerTest {
         mockMvc.perform(post("/api/courts")
                         .content(convertToJson(createDto))
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(1L))
                 .andExpect(jsonPath("$.number").value(4));
     }
@@ -80,7 +80,7 @@ public class CourtControllerTest {
     }
 
     @Test
-    public void deleteCourt_returnsDeletedCourt() throws Exception {
+    public void deleteCourt_returnsNoContent() throws Exception {
         var court = CourtFactory.createCourt(4);
         court.setId(1L);
 
@@ -88,15 +88,13 @@ public class CourtControllerTest {
                 .thenReturn(Optional.of(court));
 
         mockMvc.perform(delete("/api/courts/1"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.number").value(4));
+                .andExpect(status().isNoContent());
     }
 
     @Test
-    public void deleteAllCourts_returnsOkResponse() throws Exception {
+    public void deleteAllCourts_returnsNoContent() throws Exception {
         mockMvc.perform(delete("/api/courts"))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
     }
 
     @Test

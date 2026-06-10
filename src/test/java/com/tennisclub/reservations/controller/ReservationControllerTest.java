@@ -42,9 +42,10 @@ public class ReservationControllerTest {
     private ReservationService reservationService;
 
     @Test
-    public void createReservation_returnsPrice() throws Exception {
+    public void createReservation_returnsReservationIdAndPrice() throws Exception {
         var createDto = ReservationFactory.createCreateDto();
         var reservation = ReservationFactory.createReservation(getTime(13, 30), getTime(15, 0));
+        reservation.setId(1L);
 
         when(reservationService.create(any(ReservationCreateDto.class)))
                 .thenReturn(reservation);
@@ -57,8 +58,9 @@ public class ReservationControllerTest {
         mockMvc.perform(post("/api/reservations")
                         .content(convertToJson(createDto))
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").value(expected.toString()));
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.reservationId").value(1L))
+                .andExpect(jsonPath("$.price").value(expected.doubleValue()));
     }
 
     @Test
@@ -78,7 +80,7 @@ public class ReservationControllerTest {
     }
 
     @Test
-    public void deleteReservation_returnsDeletedReservation() throws Exception {
+    public void deleteReservation_returnsNoContent() throws Exception {
         var reservation = ReservationFactory.createReservation(getTime(13, 30), getTime(15, 0));
         reservation.setId(1L);
 
@@ -86,8 +88,7 @@ public class ReservationControllerTest {
                 .thenReturn(Optional.of(reservation));
 
         mockMvc.perform(delete("/api/reservations/1"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1L));
+                .andExpect(status().isNoContent());
     }
 
     @Test
