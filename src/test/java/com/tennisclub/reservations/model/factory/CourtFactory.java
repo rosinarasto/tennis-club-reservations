@@ -3,6 +3,7 @@ package com.tennisclub.reservations.model.factory;
 import com.tennisclub.reservations.model.dto.CourtDto;
 import com.tennisclub.reservations.model.dto.SurfaceDto;
 import com.tennisclub.reservations.model.dto.create.CourtCreateDto;
+import com.tennisclub.reservations.model.dto.update.CourtUpdateDto;
 import com.tennisclub.reservations.model.entity.Court;
 import com.tennisclub.reservations.model.entity.Reservation;
 
@@ -31,6 +32,12 @@ public class CourtFactory {
     }
 
     public static CourtCreateDto createCreateDto(int number) {
-        return new CourtCreateDto(DEFAULT_NAME, number, SurfaceFactory.createDto());
+        return new CourtCreateDto(DEFAULT_NAME, number, 1L);
+    }
+
+    public static CourtUpdateDto createUpdateDto(Long id, int number) {
+        var dto = new CourtUpdateDto(DEFAULT_NAME, number, 1L);
+        dto.setId(id);
+        return dto;
     }
 }

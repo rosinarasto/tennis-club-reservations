@@ -1,5 +1,7 @@
 package com.tennisclub.reservations.controller;
 
+import com.tennisclub.reservations.model.dto.create.ReservationCreateDto;
+import com.tennisclub.reservations.model.dto.update.ReservationUpdateDto;
 import com.tennisclub.reservations.model.entity.Reservation;
 import com.tennisclub.reservations.model.factory.ReservationFactory;
 import com.tennisclub.reservations.service.ReservationService;
@@ -22,7 +24,7 @@ import java.util.Optional;
 import static com.tennisclub.reservations.TestUtils.convertToJson;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -44,10 +46,10 @@ public class ReservationControllerTest {
         var createDto = ReservationFactory.createCreateDto();
         var reservation = ReservationFactory.createReservation(getTime(13, 30), getTime(15, 0));
 
-        when(reservationService.create(any(Reservation.class)))
+        when(reservationService.create(any(ReservationCreateDto.class)))
                 .thenReturn(reservation);
 
-        when(reservationService.isDateAvailable(anyInt(), any(LocalDateTime.class), any(LocalDateTime.class)))
+        when(reservationService.isDateAvailable(anyLong(), any(LocalDateTime.class), any(LocalDateTime.class)))
                 .thenReturn(true);
 
         var expected = BigDecimal.valueOf(126.0);
@@ -61,16 +63,15 @@ public class ReservationControllerTest {
 
     @Test
     public void updateReservation_returnsUpdatedReservation() throws Exception {
-        var reservationDto = ReservationFactory.createDto();
-        reservationDto.setId(1L);
+        var updateDto = ReservationFactory.createUpdateDto(1L);
         var reservation = ReservationFactory.createReservation(getTime(13, 30), getTime(15, 0));
         reservation.setId(1L);
 
-        when(reservationService.update(any(Reservation.class)))
+        when(reservationService.update(any(ReservationUpdateDto.class)))
                 .thenReturn(reservation);
 
         mockMvc.perform(put("/api/reservations")
-                        .content(convertToJson(reservationDto))
+                        .content(convertToJson(updateDto))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1L));

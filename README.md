@@ -185,7 +185,7 @@ Create court example:
 ```bash
 curl -X POST http://localhost:8080/api/courts \
   -H "Content-Type: application/json" \
-  -d '{"name":"Center Court","number":10,"surface":{"id":1,"minutePrice":0.24,"name":"Hard"}}'
+  -d '{"name":"Center Court","number":10,"surfaceId":1}'
 ```
 
 ### Reservations
@@ -213,16 +213,7 @@ curl -X POST http://localhost:8080/api/reservations \
       "name":"John Doe",
       "phoneNumber":"+421901234567"
     },
-    "court":{
-      "id":1,
-      "name":"Emerald Bay Tennis Center",
-      "number":1,
-      "surface":{
-        "id":1,
-        "minutePrice":0.24,
-        "name":"Hard"
-      }
-    }
+    "courtId":1
   }'
 ```
 

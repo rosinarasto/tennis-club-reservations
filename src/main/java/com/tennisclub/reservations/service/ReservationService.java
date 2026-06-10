@@ -1,5 +1,7 @@
 package com.tennisclub.reservations.service;
 
+import com.tennisclub.reservations.model.dto.create.ReservationCreateDto;
+import com.tennisclub.reservations.model.dto.update.ReservationUpdateDto;
 import com.tennisclub.reservations.model.entity.Reservation;
 
 import java.time.LocalDateTime;
@@ -13,20 +15,28 @@ public interface ReservationService extends CrudService<Reservation> {
     /**
      * Creates a new reservation with a managed court and user.
      *
-     * @param reservation reservation to create.
+     * @param createDto reservation data to create.
      * @return created reservation.
      */
-    Reservation create(Reservation reservation);
+    Reservation create(ReservationCreateDto createDto);
+
+    /**
+     * Updates an existing reservation with a managed court and user.
+     *
+     * @param updateDto reservation data to update.
+     * @return updated reservation.
+     */
+    Reservation update(ReservationUpdateDto updateDto);
 
     /**
      * Checks whether the requested court is available for the given time interval.
      *
-     * @param number court number.
+     * @param courtId court id.
      * @param from reservation start.
      * @param to reservation end.
      * @return {@code true} when the court exists and has no overlapping reservation.
      */
-    boolean isDateAvailable(int number, LocalDateTime from, LocalDateTime to);
+    boolean isDateAvailable(Long courtId, LocalDateTime from, LocalDateTime to);
 
     /**
      * Finds reservations for the given court number.

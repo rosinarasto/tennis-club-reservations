@@ -5,6 +5,7 @@ import com.tennisclub.reservations.mapper.ReservationMapper;
 import com.tennisclub.reservations.model.dto.PaginatedResponse;
 import com.tennisclub.reservations.model.dto.ReservationDto;
 import com.tennisclub.reservations.model.dto.create.ReservationCreateDto;
+import com.tennisclub.reservations.model.dto.update.ReservationUpdateDto;
 import com.tennisclub.reservations.model.Role;
 import com.tennisclub.reservations.security.annotation.RequiredRoles;
 import com.tennisclub.reservations.service.ReservationService;
@@ -33,16 +34,15 @@ public class ReservationController {
     @RequiredRoles({Role.USER, Role.ADMIN})
     @PostMapping
     public ResponseEntity<BigDecimal> createReservation(@Valid @RequestBody ReservationCreateDto reservationCreateDto) {
-        var reservation = reservationService.create(reservationMapper.toEntityFromCreateDto(reservationCreateDto));
+        var reservation = reservationService.create(reservationCreateDto);
         var price = PriceCalculationUtil.calculatePrice(reservation);
         return ResponseEntity.ok().body(price);
     }
 
     @RequiredRoles(Role.ADMIN)
     @PutMapping
-    public ResponseEntity<ReservationDto> updateReservation(@Valid @RequestBody ReservationDto updateDto) {
-        var reservation = reservationMapper.toEntityFromUpdateDto(updateDto);
-        return ResponseEntity.ok(reservationMapper.toDto(reservationService.update(reservation)));
+    public ResponseEntity<ReservationDto> updateReservation(@Valid @RequestBody ReservationUpdateDto updateDto) {
+        return ResponseEntity.ok(reservationMapper.toDto(reservationService.update(updateDto)));
     }
 
     @RequiredRoles(Role.ADMIN)

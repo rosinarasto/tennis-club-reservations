@@ -37,9 +37,9 @@ public @interface AvailableDate {
     Class<? extends Payload>[] payload() default {};
 
     /**
-     * Name of the field containing the court value.
+     * Name of the field containing the court id.
      */
-    String courtField() default "court";
+    String courtField() default "courtId";
 
     /**
      * Name of the field containing the reservation start.

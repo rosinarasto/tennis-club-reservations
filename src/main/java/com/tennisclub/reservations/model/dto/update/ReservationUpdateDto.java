@@ -1,7 +1,8 @@
-package com.tennisclub.reservations.model.dto.create;
+package com.tennisclub.reservations.model.dto.update;
 
 import com.tennisclub.reservations.model.GameType;
-import com.tennisclub.reservations.validator.annotation.AvailableDate;
+import com.tennisclub.reservations.model.dto.BaseDto;
+import com.tennisclub.reservations.model.dto.create.UserCreateDto;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
@@ -15,8 +16,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@AvailableDate
-public class ReservationCreateDto {
+public class ReservationUpdateDto extends BaseDto {
 
     @FutureOrPresent
     @NotNull

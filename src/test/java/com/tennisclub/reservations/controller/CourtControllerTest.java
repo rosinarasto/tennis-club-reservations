@@ -1,6 +1,8 @@
 package com.tennisclub.reservations.controller;
 
 import com.tennisclub.reservations.model.entity.Court;
+import com.tennisclub.reservations.model.dto.create.CourtCreateDto;
+import com.tennisclub.reservations.model.dto.update.CourtUpdateDto;
 import com.tennisclub.reservations.model.entity.Reservation;
 import com.tennisclub.reservations.model.factory.CourtFactory;
 import com.tennisclub.reservations.model.factory.ReservationFactory;
@@ -49,7 +51,7 @@ public class CourtControllerTest {
         var court = CourtFactory.createCourt(4);
         court.setId(1L);
 
-        when(courtService.create(any(Court.class)))
+        when(courtService.create(any(CourtCreateDto.class)))
                 .thenReturn(court);
 
         mockMvc.perform(post("/api/courts")
@@ -62,15 +64,15 @@ public class CourtControllerTest {
 
     @Test
     public void updateCourt_returnsUpdatedCourt() throws Exception {
-        var courtDto = CourtFactory.createDto(1L, 4);
+        var updateDto = CourtFactory.createUpdateDto(1L, 4);
         var court = CourtFactory.createCourt(4);
         court.setId(1L);
 
-        when(courtService.update(any(Court.class)))
+        when(courtService.update(any(CourtUpdateDto.class)))
                 .thenReturn(court);
 
         mockMvc.perform(put("/api/courts")
-                        .content(convertToJson(courtDto))
+                        .content(convertToJson(updateDto))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1L))

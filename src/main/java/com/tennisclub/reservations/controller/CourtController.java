@@ -7,6 +7,7 @@ import com.tennisclub.reservations.model.dto.CourtDto;
 import com.tennisclub.reservations.model.dto.PaginatedResponse;
 import com.tennisclub.reservations.model.dto.ReservationDto;
 import com.tennisclub.reservations.model.dto.create.CourtCreateDto;
+import com.tennisclub.reservations.model.dto.update.CourtUpdateDto;
 import com.tennisclub.reservations.model.Role;
 import com.tennisclub.reservations.security.annotation.RequiredRoles;
 import com.tennisclub.reservations.service.CourtService;
@@ -44,15 +45,13 @@ public class CourtController {
     @RequiredRoles(Role.ADMIN)
     @PostMapping
     public ResponseEntity<CourtDto> createCourt(@Valid @RequestBody CourtCreateDto createDto) {
-        var court = courtMapper.toEntityFromCreateDto(createDto);
-        return ResponseEntity.ok(courtMapper.toDto(courtService.create(court)));
+        return ResponseEntity.ok(courtMapper.toDto(courtService.create(createDto)));
     }
 
     @RequiredRoles(Role.ADMIN)
     @PutMapping
-    public ResponseEntity<CourtDto> updateCourt(@Valid @RequestBody CourtDto updateDto) {
-        var court = courtMapper.toEntityFromUpdateDto(updateDto);
-        return ResponseEntity.ok(courtMapper.toDto(courtService.update(court)));
+    public ResponseEntity<CourtDto> updateCourt(@Valid @RequestBody CourtUpdateDto updateDto) {
+        return ResponseEntity.ok(courtMapper.toDto(courtService.update(updateDto)));
     }
 
     @RequiredRoles(Role.ADMIN)

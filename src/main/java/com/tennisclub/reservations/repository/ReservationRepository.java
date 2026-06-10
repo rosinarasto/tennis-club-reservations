@@ -13,12 +13,12 @@ public interface ReservationRepository extends CrudRepository<Reservation> {
     /**
      * Checks whether the requested court is available for the given time interval.
      *
-     * @param number court number.
+     * @param courtId court id.
      * @param from reservation start.
      * @param to reservation end.
      * @return {@code true} when the court exists and has no overlapping reservation.
      */
-    boolean isDateAvailable(int number, LocalDateTime from, LocalDateTime to);
+    boolean isDateAvailable(Long courtId, LocalDateTime from, LocalDateTime to);
 
     /**
      * Finds non-deleted reservations for the given court number.

@@ -1,7 +1,7 @@
 package com.tennisclub.reservations.controller;
 
+import com.tennisclub.reservations.model.dto.create.ReservationCreateDto;
 import com.tennisclub.reservations.model.Role;
-import com.tennisclub.reservations.model.entity.Reservation;
 import com.tennisclub.reservations.model.entity.Surface;
 import com.tennisclub.reservations.model.factory.ReservationFactory;
 import com.tennisclub.reservations.model.factory.SurfaceFactory;
@@ -25,7 +25,7 @@ import java.util.List;
 
 import static com.tennisclub.reservations.TestUtils.convertToJson;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -143,9 +143,9 @@ public class JwtSecurityTest {
                 LocalDateTime.of(2026, 12, 31, 15, 0)
         );
 
-        when(reservationService.isDateAvailable(anyInt(), any(LocalDateTime.class), any(LocalDateTime.class)))
+        when(reservationService.isDateAvailable(anyLong(), any(LocalDateTime.class), any(LocalDateTime.class)))
                 .thenReturn(true);
-        when(reservationService.create(any(Reservation.class)))
+        when(reservationService.create(any(ReservationCreateDto.class)))
                 .thenReturn(reservation);
 
         mockMvc.perform(post("/api/reservations")
