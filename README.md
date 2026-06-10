@@ -67,6 +67,7 @@ When enabled, the application creates default court surfaces and courts if they 
 
 - surfaces: `Hard`, `Clay`
 - courts: numbers `1` to `4`
+- admin user from `data.init.admin.*` properties
 
 To disable startup data, set:
 
@@ -82,7 +83,57 @@ Base path:
 /api
 ```
 
-Security is currently configured to permit all requests.
+The `/api/auth/**` endpoints are public. Other `/api/**` endpoints require a valid JWT Bearer token.
+
+Role-based authorization:
+
+- `USER` can call read endpoints and create reservations
+- `ADMIN` can call all endpoints
+- insufficient permissions return `403 Forbidden`
+
+### Authentication
+
+```text
+POST /api/auth/login
+POST /api/auth/refresh
+```
+
+Login uses a JSON request body. The username is the user's phone number.
+
+Successful login and refresh return a JWT access token and refresh token in the response body:
+
+```json
+{
+  "accessToken": "<access-token>",
+  "refreshToken": "<refresh-token>"
+}
+```
+
+Login example:
+
+```bash
+curl -i -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"phoneNumber":"+421900000000","password":"admin"}'
+```
+
+Refresh example:
+
+```bash
+curl -i -X POST http://localhost:8080/api/auth/refresh \
+  -H "Content-Type: application/json" \
+  -d '{"refreshToken":"<refresh-token>"}'
+```
+
+Refresh tokens are accepted only by `/api/auth/refresh`. Secured API endpoints require an access token.
+
+JWT configuration:
+
+```properties
+security.jwt.secret=change-this-secret-before-production-123456
+security.jwt.access-token-expiration=PT15M
+security.jwt.refresh-token-expiration=P7D
+```
 
 ### Surfaces
 
@@ -146,8 +197,7 @@ curl -X POST http://localhost:8080/api/reservations \
     "gameType":"SINGLES",
     "user":{
       "name":"John Doe",
-      "phoneNumber":"+421901234567",
-      "password":"secret"
+      "phoneNumber":"+421901234567"
     },
     "court":{
       "id":1,

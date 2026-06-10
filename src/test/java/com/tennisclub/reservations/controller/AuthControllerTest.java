@@ -1,5 +1,8 @@
 package com.tennisclub.reservations.controller;
 
+import com.jayway.jsonpath.JsonPath;
+import com.tennisclub.reservations.auth.dto.AuthRequestDto;
+import com.tennisclub.reservations.auth.dto.RefreshTokenDto;
 import com.tennisclub.reservations.model.Role;
 import com.tennisclub.reservations.model.factory.UserFactory;
 import com.tennisclub.reservations.repository.UserRepository;
@@ -7,19 +10,18 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.Optional;
 
+import static com.tennisclub.reservations.TestUtils.convertToJson;
 import static org.hamcrest.Matchers.startsWith;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(properties = {
@@ -30,7 +32,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 public class AuthControllerTest {
 
-    private static final String REFRESH_TOKEN_HEADER = "X-Refresh-Token";
     private static final String PHONE_NUMBER = "+421900000000";
     private static final String PASSWORD = "admin";
 
@@ -48,10 +49,11 @@ public class AuthControllerTest {
         mockUser();
 
         mockMvc.perform(post("/api/auth/login")
-                        .header(HttpHeaders.AUTHORIZATION, basic(PHONE_NUMBER, PASSWORD)))
+                        .content(convertToJson(new AuthRequestDto(PHONE_NUMBER, PASSWORD)))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(header().string(HttpHeaders.AUTHORIZATION, startsWith("Bearer ")))
-                .andExpect(header().string(REFRESH_TOKEN_HEADER, startsWith("Bearer ")));
+                .andExpect(jsonPath("$.accessToken", startsWith("ey")))
+                .andExpect(jsonPath("$.refreshToken", startsWith("ey")));
     }
 
     @Test
@@ -59,14 +61,15 @@ public class AuthControllerTest {
         mockUser();
 
         mockMvc.perform(post("/api/auth/login")
-                        .header(HttpHeaders.AUTHORIZATION, basic(PHONE_NUMBER, "wrong-password")))
+                        .content(convertToJson(new AuthRequestDto(PHONE_NUMBER, "wrong-password")))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
-    public void login_returnsUnauthorizedWhenBasicHeaderIsMissing() throws Exception {
+    public void login_returnsBadRequestWhenBodyIsMissing() throws Exception {
         mockMvc.perform(post("/api/auth/login"))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -74,29 +77,34 @@ public class AuthControllerTest {
         mockUser();
 
         var loginResult = mockMvc.perform(post("/api/auth/login")
-                        .header(HttpHeaders.AUTHORIZATION, basic(PHONE_NUMBER, PASSWORD)))
+                        .content(convertToJson(new AuthRequestDto(PHONE_NUMBER, PASSWORD)))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
 
-        var refreshToken = loginResult.getResponse().getHeader(REFRESH_TOKEN_HEADER);
+        String refreshToken = JsonPath.read(loginResult.getResponse().getContentAsString(), "$.refreshToken");
 
         mockMvc.perform(post("/api/auth/refresh")
-                        .header(HttpHeaders.AUTHORIZATION, refreshToken))
+                        .content(convertToJson(new RefreshTokenDto(refreshToken)))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(header().string(HttpHeaders.AUTHORIZATION, startsWith("Bearer ")))
-                .andExpect(header().string(REFRESH_TOKEN_HEADER, startsWith("Bearer ")));
+                .andExpect(jsonPath("$.accessToken", startsWith("ey")))
+                .andExpect(jsonPath("$.refreshToken", startsWith("ey")));
     }
 
     @Test
-    public void refresh_returnsUnauthorizedWhenRefreshTokenIsMissing() throws Exception {
-        mockMvc.perform(post("/api/auth/refresh"))
-                .andExpect(status().isUnauthorized());
+    public void refresh_returnsBadRequestWhenRefreshTokenIsMissing() throws Exception {
+        mockMvc.perform(post("/api/auth/refresh")
+                        .content(convertToJson(new RefreshTokenDto("")))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
     public void refresh_returnsUnauthorizedWhenRefreshTokenIsInvalid() throws Exception {
         mockMvc.perform(post("/api/auth/refresh")
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer invalid-token"))
+                        .content(convertToJson(new RefreshTokenDto("invalid-token")))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -105,21 +113,20 @@ public class AuthControllerTest {
         mockUser();
 
         var loginResult = mockMvc.perform(post("/api/auth/login")
-                        .header(HttpHeaders.AUTHORIZATION, basic(PHONE_NUMBER, PASSWORD)))
+                        .content(convertToJson(new AuthRequestDto(PHONE_NUMBER, PASSWORD)))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
 
         when(userRepository.findByPhoneNumber(PHONE_NUMBER))
                 .thenReturn(Optional.empty());
 
-        mockMvc.perform(post("/api/auth/refresh")
-                        .header(HttpHeaders.AUTHORIZATION, loginResult.getResponse().getHeader(REFRESH_TOKEN_HEADER)))
-                .andExpect(status().isUnauthorized());
-    }
+        String refreshToken = JsonPath.read(loginResult.getResponse().getContentAsString(), "$.refreshToken");
 
-    private String basic(String username, String password) {
-        var credentials = username + ":" + password;
-        return "Basic " + Base64.getEncoder().encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
+        mockMvc.perform(post("/api/auth/refresh")
+                        .content(convertToJson(new RefreshTokenDto(refreshToken)))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized());
     }
 
     private void mockUser() {

@@ -1,5 +1,6 @@
 package com.tennisclub.reservations.controller;
 
+import com.tennisclub.reservations.model.Role;
 import com.tennisclub.reservations.model.entity.Reservation;
 import com.tennisclub.reservations.model.entity.Surface;
 import com.tennisclub.reservations.model.factory.ReservationFactory;
@@ -68,14 +69,14 @@ public class JwtSecurityTest {
                 .thenReturn(new PageImpl<>(List.of()));
 
         mockMvc.perform(get("/api/surfaces")
-                        .header(HttpHeaders.AUTHORIZATION, bearerToken("USER")))
+                        .header(HttpHeaders.AUTHORIZATION, bearerToken(Role.USER.getValue())))
                 .andExpect(status().isOk());
     }
 
     @Test
     public void securedEndpoint_returnsUnauthorizedWhenRefreshTokenIsUsed() throws Exception {
         mockMvc.perform(get("/api/surfaces")
-                        .header(HttpHeaders.AUTHORIZATION, refreshBearerToken("USER")))
+                        .header(HttpHeaders.AUTHORIZATION, refreshBearerToken(Role.USER.getValue())))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -84,7 +85,7 @@ public class JwtSecurityTest {
         var createDto = SurfaceFactory.createCreateDto("wet");
 
         mockMvc.perform(post("/api/surfaces")
-                        .header(HttpHeaders.AUTHORIZATION, bearerToken("USER"))
+                        .header(HttpHeaders.AUTHORIZATION, bearerToken(Role.USER.getValue()))
                         .content(convertToJson(createDto))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isForbidden());
@@ -100,7 +101,7 @@ public class JwtSecurityTest {
                 .thenReturn(surface);
 
         mockMvc.perform(post("/api/surfaces")
-                        .header(HttpHeaders.AUTHORIZATION, bearerToken("ADMIN"))
+                        .header(HttpHeaders.AUTHORIZATION, bearerToken(Role.ADMIN.getValue()))
                         .content(convertToJson(createDto))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
@@ -120,7 +121,7 @@ public class JwtSecurityTest {
                 .thenReturn(reservation);
 
         mockMvc.perform(post("/api/reservations")
-                        .header(HttpHeaders.AUTHORIZATION, bearerToken("USER"))
+                        .header(HttpHeaders.AUTHORIZATION, bearerToken(Role.USER.getValue()))
                         .content(convertToJson(createDto))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());

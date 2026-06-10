@@ -1,6 +1,6 @@
 package com.tennisclub.reservations.security.annotation;
 
-import org.springframework.security.access.prepost.PreAuthorize;
+import com.tennisclub.reservations.model.Role;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -9,6 +9,7 @@ import java.lang.annotation.Target;
 
 @Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-@PreAuthorize("hasAnyAuthority(T(com.tennisclub.reservations.model.Role).USER.name(), T(com.tennisclub.reservations.model.Role).ADMIN.name())")
-public @interface UserOrAdmin {
+public @interface RequiredRoles {
+
+    Role[] value();
 }

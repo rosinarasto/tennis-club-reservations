@@ -7,8 +7,8 @@ import com.tennisclub.reservations.model.dto.CourtDto;
 import com.tennisclub.reservations.model.dto.PaginatedResponse;
 import com.tennisclub.reservations.model.dto.ReservationDto;
 import com.tennisclub.reservations.model.dto.create.CourtCreateDto;
-import com.tennisclub.reservations.security.annotation.AdminOnly;
-import com.tennisclub.reservations.security.annotation.UserOrAdmin;
+import com.tennisclub.reservations.model.Role;
+import com.tennisclub.reservations.security.annotation.RequiredRoles;
 import com.tennisclub.reservations.service.CourtService;
 import com.tennisclub.reservations.service.ReservationService;
 import jakarta.validation.Valid;
@@ -41,28 +41,28 @@ public class CourtController {
         this.reservationMapper = reservationMapper;
     }
 
-    @AdminOnly
+    @RequiredRoles(Role.ADMIN)
     @PostMapping
     public ResponseEntity<CourtDto> createCourt(@Valid @RequestBody CourtCreateDto createDto) {
         var court = courtMapper.toEntityFromCreateDto(createDto);
         return ResponseEntity.ok(courtMapper.toDto(courtService.create(court)));
     }
 
-    @AdminOnly
+    @RequiredRoles(Role.ADMIN)
     @PutMapping
     public ResponseEntity<CourtDto> updateCourt(@Valid @RequestBody CourtDto updateDto) {
         var court = courtMapper.toEntityFromUpdateDto(updateDto);
         return ResponseEntity.ok(courtMapper.toDto(courtService.update(court)));
     }
 
-    @AdminOnly
+    @RequiredRoles(Role.ADMIN)
     @DeleteMapping
     public ResponseEntity<Void> deleteCourts(Pageable pageable) {
         courtService.softDeleteAll(pageable);
         return ResponseEntity.ok().build();
     }
 
-    @AdminOnly
+    @RequiredRoles(Role.ADMIN)
     @DeleteMapping(ApiUris.ID_URI)
     public ResponseEntity<CourtDto> deleteCourt(@PathVariable long id) {
         var court = courtService.softDeleteById(id);
@@ -71,14 +71,14 @@ public class CourtController {
                 .orElseGet(() -> ResponseEntity.badRequest().build());
     }
 
-    @UserOrAdmin
+    @RequiredRoles({Role.USER, Role.ADMIN})
     @GetMapping
     public ResponseEntity<PaginatedResponse<CourtDto>> getCourts(Pageable pageable) {
         var courts = courtService.findAll(pageable).map(courtMapper::toDto);
         return ResponseEntity.ok(PaginatedResponse.from(courts));
     }
 
-    @UserOrAdmin
+    @RequiredRoles({Role.USER, Role.ADMIN})
     @GetMapping(ApiUris.ID_URI)
     public ResponseEntity<CourtDto> getCourt(@PathVariable long id) {
         var court = courtService.findById(id);
@@ -87,7 +87,7 @@ public class CourtController {
                 .orElseGet(() -> ResponseEntity.badRequest().build());
     }
 
-    @UserOrAdmin
+    @RequiredRoles({Role.USER, Role.ADMIN})
     @GetMapping(ApiUris.COURT_RESERVATIONS_URI)
     public ResponseEntity<List<ReservationDto>> getCourtReservations(@PathVariable int number) {
         var reservations = reservationService.findByCourtNumber(number);

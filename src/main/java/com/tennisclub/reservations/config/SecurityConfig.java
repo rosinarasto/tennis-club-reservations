@@ -1,49 +1,42 @@
 package com.tennisclub.reservations.config;
 
-import com.nimbusds.jose.jwk.source.ImmutableSecret;
-import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Value;
+import com.tennisclub.reservations.security.AuthEndpointBearerTokenResolver;
+import com.tennisclub.reservations.security.JwtAuthenticationConverterFactory;
+import com.tennisclub.reservations.security.RequiredRolesAuthorizationManager;
+import com.tennisclub.reservations.security.annotation.RequiredRoles;
+import org.springframework.aop.support.ComposablePointcut;
+import org.springframework.aop.support.annotation.AnnotationMatchingPointcut;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.convert.converter.Converter;
-import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.context.annotation.Role;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authorization.method.AuthorizationManagerBeforeMethodInterceptor;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
-import org.springframework.security.oauth2.core.OAuth2Error;
-import org.springframework.security.oauth2.core.OAuth2TokenValidatorResult;
-import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.JwtEncoder;
-import org.springframework.security.oauth2.jwt.JwtTimestampValidator;
-import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
-import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.www.BasicAuthenticationConverter;
-
-import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
-import java.util.Collection;
-import java.util.List;
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    private static final String HMAC_SHA256 = "HmacSHA256";
+    private final AuthEndpointBearerTokenResolver bearerTokenResolver;
+    private final JwtAuthenticationConverterFactory jwtAuthenticationConverterFactory;
+
+    public SecurityConfig(
+            AuthEndpointBearerTokenResolver bearerTokenResolver,
+            JwtAuthenticationConverterFactory jwtAuthenticationConverterFactory
+    ) {
+        this.bearerTokenResolver = bearerTokenResolver;
+        this.jwtAuthenticationConverterFactory = jwtAuthenticationConverterFactory;
+    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -54,8 +47,8 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .oauth2ResourceServer(resourceServer -> resourceServer
-                    .bearerTokenResolver(this::resolveBearerToken)
-                    .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())));
+                    .bearerTokenResolver(bearerTokenResolver::resolve)
+                    .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverterFactory.create())));
 
         return http.build();
     }
@@ -71,66 +64,15 @@ public class SecurityConfig {
     }
 
     @Bean
-    public BasicAuthenticationConverter basicAuthenticationConverter() {
-        return new BasicAuthenticationConverter();
-    }
+    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
+    public static AuthorizationManagerBeforeMethodInterceptor requiredRolesAuthorizationManager() {
+        var methodPointcut = AnnotationMatchingPointcut.forMethodAnnotation(RequiredRoles.class);
+        var classPointcut = AnnotationMatchingPointcut.forClassAnnotation(RequiredRoles.class);
+        var requiredRolesPointcut = new ComposablePointcut(methodPointcut).union(classPointcut);
 
-    @Bean
-    public JwtEncoder jwtEncoder(@Value("${security.jwt.secret}") String secret) {
-        return new NimbusJwtEncoder(new ImmutableSecret<>(createSecretKey(secret)));
-    }
-
-    @Bean
-    public JwtDecoder jwtDecoder(@Value("${security.jwt.secret}") String secret) {
-        var decoder = NimbusJwtDecoder.withSecretKey(createSecretKey(secret))
-                .macAlgorithm(MacAlgorithm.HS256)
-                .build();
-
-        decoder.setJwtValidator(new DelegatingOAuth2TokenValidator<>(
-                new JwtTimestampValidator(),
-                this::validateAccessToken
-        ));
-
-        return decoder;
-    }
-
-    @Bean
-    public Converter<Jwt, ? extends AbstractAuthenticationToken> jwtAuthenticationConverter() {
-        var jwtAuthenticationConverter = new JwtAuthenticationConverter();
-        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(this::getAuthorities);
-
-        return jwtAuthenticationConverter;
-    }
-
-    private Collection<GrantedAuthority> getAuthorities(Jwt jwt) {
-        var role = jwt.getClaimAsString("role");
-
-        if (role == null || role.isBlank()) {
-            return List.of();
-        }
-
-        return List.of(new SimpleGrantedAuthority(role));
-    }
-
-    private SecretKeySpec createSecretKey(String secret) {
-        return new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), HMAC_SHA256);
-    }
-
-    private String resolveBearerToken(HttpServletRequest request) {
-        if (request.getRequestURI().startsWith(ApiUris.AUTH_URI + "/")) {
-            return null;
-        }
-
-        return new DefaultBearerTokenResolver().resolve(request);
-    }
-
-    private OAuth2TokenValidatorResult validateAccessToken(Jwt jwt) {
-        if (com.tennisclub.reservations.security.JwtService.ACCESS_TOKEN_TYPE.equals(
-                jwt.getClaimAsString(com.tennisclub.reservations.security.JwtService.TOKEN_TYPE_CLAIM))) {
-            return OAuth2TokenValidatorResult.success();
-        }
-
-        var error = new OAuth2Error("invalid_token", "Invalid token type", null);
-        return OAuth2TokenValidatorResult.failure(error);
+        return new AuthorizationManagerBeforeMethodInterceptor(
+                requiredRolesPointcut,
+                new RequiredRolesAuthorizationManager()
+        );
     }
 }
